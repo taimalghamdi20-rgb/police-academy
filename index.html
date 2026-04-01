@@ -1,129 +1,169 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trust | Police Academy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Cairo', Arial, sans-serif;
-      background: linear-gradient(135deg, #020617, #0f172a);
-      color: white;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trust | Police Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
-    header {
-      text-align: center;
-      padding: 30px;
-      font-size: 32px;
-      font-weight: bold;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: linear-gradient(135deg,#020617,#0f172a,#020617);
+  color: white;
+}
 
-    .container {
-      max-width: 700px;
-      margin: 40px auto;
-      background: rgba(255,255,255,0.05);
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.6);
-      backdrop-filter: blur(15px);
-    }
+header {
+  padding: 25px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+nav {
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  padding:15px;
+}
+nav button {
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#1e293b;
+  color:white;
+}
 
-    label {
-      display: block;
-      margin-top: 15px;
-      font-size: 14px;
-    }
+section { display:none; padding:30px; }
+.active { display:block; }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 5px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
+.container {
+  max-width:800px;
+  margin:auto;
+  background:rgba(255,255,255,0.05);
+  padding:30px;
+  border-radius:16px;
+}
 
-    input::placeholder, textarea::placeholder {
-      color: #ccc;
-    }
+input, textarea, select {
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  color:white;
+}
 
-    button {
-      margin-top: 25px;
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
-    }
+button.submit {
+  margin-top:20px;
+  padding:15px;
+  width:100%;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+}
 
-    button:hover {
-      transform: scale(1.03);
-      opacity: 0.9;
-    }
-
-    .success {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-      color: #22c55e;
-      font-weight: bold;
-    }
-  </style>
+.card {
+  background:rgba(255,255,255,0.05);
+  padding:20px;
+  border-radius:12px;
+  margin-top:15px;
+}
+</style>
 </head>
 <body>
 
 <header>Trust | Police Academy</header>
 
-<div class="container">
-  <h2>نموذج التقديم العسكري</h2>
+<nav>
+  <button onclick="showPage('home')">الرئيسية</button>
+  <button onclick="showPage('apply')">التقديم</button>
+  <button onclick="showPage('admin')">الإدارة</button>
+</nav>
 
-  <form onsubmit="submitForm(event)">
-    <label>الاسم الكامل</label>
-    <input type="text" placeholder="اكتب اسمك هنا" required>
+<section id="home" class="active">
+  <div class="container">
+    <h2>مرحبا بك في الأكاديمية</h2>
+    <p>نظام تقديم احترافي للانضمام إلى الشرطة</p>
+  </div>
+</section>
 
-    <label>العمر</label>
-    <input type="number" placeholder="مثال: 18" required>
+<section id="apply">
+  <div class="container">
+    <h2>نموذج التقديم</h2>
 
-    <label>الرتبة المطلوبة</label>
-    <select>
+    <input id="name" placeholder="الاسم الكامل">
+    <input id="age" type="number" placeholder="العمر">
+
+    <select id="rank">
       <option>Cadet</option>
       <option>Officer</option>
       <option>Sergeant</option>
     </select>
 
-    <label>الخبرات</label>
-    <textarea rows="3" placeholder="اكتب خبراتك"></textarea>
+    <textarea id="exp" placeholder="الخبرات"></textarea>
+    <textarea id="reason" placeholder="سبب التقديم"></textarea>
 
-    <label>سبب التقديم</label>
-    <textarea rows="3" placeholder="ليش تبغى تنضم؟"></textarea>
+    <button class="submit" onclick="submitForm()">إرسال</button>
+  </div>
+</section>
 
-    <button type="submit">إرسال الطلب</button>
-  </form>
-
-  <div class="success" id="msg">✅ تم إرسال طلبك بنجاح</div>
-</div>
+<section id="admin">
+  <div class="container">
+    <h2>لوحة الإدارة</h2>
+    <div id="requests"></div>
+  </div>
+</section>
 
 <script>
-function submitForm(e) {
-  e.preventDefault();
-  document.getElementById('msg').style.display = 'block';
+function showPage(page) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
 }
+
+function submitForm() {
+  let data = {
+    name: document.getElementById('name').value,
+    age: document.getElementById('age').value,
+    rank: document.getElementById('rank').value,
+    exp: document.getElementById('exp').value,
+    reason: document.getElementById('reason').value
+  };
+
+  let requests = JSON.parse(localStorage.getItem('طلبات') || '[]');
+  requests.push(data);
+  localStorage.setItem('طلبات', JSON.stringify(requests));
+
+  alert('تم إرسال الطلب');
+}
+
+function loadRequests() {
+  let container = document.getElementById('requests');
+  container.innerHTML = '';
+
+  let requests = JSON.parse(localStorage.getItem('طلبات') || '[]');
+
+  requests.forEach(r => {
+    let div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <b>الاسم:</b> ${r.name}<br>
+      <b>العمر:</b> ${r.age}<br>
+      <b>الرتبة:</b> ${r.rank}<br>
+      <b>الخبرة:</b> ${r.exp}<br>
+      <b>السبب:</b> ${r.reason}
+    `;
+    container.appendChild(div);
+  });
+}
+
+setInterval(loadRequests, 2000);
 </script>
 
 </body>
