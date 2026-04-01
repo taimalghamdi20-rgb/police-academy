@@ -52,7 +52,7 @@ section { display:none; padding:30px; }
 input, textarea {
   width:100%;
   margin-top:10px;
-  padding:15px; /* حجم موحد لجميع الحقول */
+  padding:15px;
   border:none;
   border-radius:10px;
   background:rgba(255,255,255,0.1);
@@ -116,9 +116,23 @@ button.submit {
 </section>
 
 <script>
+let isAdmin = false; // افتراضياً الشخص مو أدمن
+
 function showPage(page) {
+  if(page === 'admin' && !isAdmin) {
+    let pass = prompt("أدخل كلمة المرور للوصول للإدارة:");
+    if(pass === "Police2026!") { // كلمة المرور الجديدة
+      isAdmin = true;
+    } else {
+      alert("كلمة المرور خاطئة!");
+      return; // ما يفتح الصفحة
+    }
+  }
+
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   document.getElementById(page).classList.add('active');
+
+  if(page === 'admin') loadRequests();
 }
 
 function submitForm() {
