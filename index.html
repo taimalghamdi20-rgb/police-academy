@@ -49,14 +49,15 @@ section { display:none; padding:30px; }
   border-radius:16px;
 }
 
-input, textarea, select {
+input, textarea {
   width:100%;
   margin-top:10px;
-  padding:12px;
+  padding:15px; /* حجم موحد لجميع الحقول */
   border:none;
   border-radius:10px;
   background:rgba(255,255,255,0.1);
   color:white;
+  font-size:16px;
 }
 
 button.submit {
@@ -100,13 +101,6 @@ button.submit {
 
     <input id="name" placeholder="الاسم الكامل">
     <input id="age" type="number" placeholder="العمر">
-
-    <select id="rank">
-      <option>Cadet</option>
-      <option>Officer</option>
-      <option>Sergeant</option>
-    </select>
-
     <textarea id="exp" placeholder="الخبرات"></textarea>
     <textarea id="reason" placeholder="سبب التقديم"></textarea>
 
@@ -131,7 +125,6 @@ function submitForm() {
   let data = {
     name: document.getElementById('name').value,
     age: document.getElementById('age').value,
-    rank: document.getElementById('rank').value,
     exp: document.getElementById('exp').value,
     reason: document.getElementById('reason').value
   };
@@ -155,7 +148,6 @@ function loadRequests() {
     div.innerHTML = `
       <b>الاسم:</b> ${r.name}<br>
       <b>العمر:</b> ${r.age}<br>
-      <b>الرتبة:</b> ${r.rank}<br>
       <b>الخبرة:</b> ${r.exp}<br>
       <b>السبب:</b> ${r.reason}
     `;
