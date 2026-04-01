@@ -15,18 +15,65 @@ nav button { padding:10px 20px; border:none; border-radius:10px; cursor:pointer;
 section { display:none; padding:30px; }
 .active { display:block; }
 .container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
-input, textarea, select { width:100%; margin-top:10px; padding:15px; border:none; border-radius:10px; background:rgba(255,255,255,0.1); color:white; font-size:16px; }
-button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gradient(135deg,#22c55e,#16a34a); border:none; border-radius:12px; cursor:pointer; }
-.card { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-top:15px; position: relative; }
-.card button { margin-left:10px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+
+/* الحقول الموحدة */
+input, textarea, select {
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+}
+
+input[type="number"], input[type="text"], input[type="password"] {
+    height: 50px; /* ارتفاع موحد للحقل */
+}
+
+textarea {
+    height: 100px; /* ارتفاع أكبر للنصوص الطويلة */
+}
+
+button.submit {
+    margin-top: 20px;
+    padding: 15px;
+    width: 100%;
+    background: linear-gradient(135deg,#22c55e,#16a34a);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 15px;
+    position: relative;
+    transition: background 0.3s;
+}
+
+.card button {
+    margin-left:10px;
+    padding:6px 12px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
 .card button.accept { background:#16a34a; color:white; }
 .card button.reject { background:#dc2626; color:white; }
+
 .status { font-weight:bold; margin-left:10px; }
 .status.pending { color:yellow; }
 .status.accepted { color:#22c55e; }
 .status.rejected { color:#dc2626; }
+
 .message-box { margin-top:15px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.1); font-weight:bold; text-align:center; }
-input[type="password"] { background:rgba(255,255,255,0.1); color:white; }
 ul { margin-top:10px; padding-left:20px; }
 </style>
 
@@ -61,6 +108,10 @@ window.showPage = function(page) {
   document.getElementById(page).classList.add('active');
   if(page === 'admin' && isAdmin) loadRequests();
   if(page === 'admin') document.getElementById('adminMessage').innerText = '';
+  if(page === 'apply' && localStorage.getItem('sentRequest')) {
+    const discordId = document.getElementById('discordId').value.trim();
+    updateStatusByDiscord(discordId);
+  }
 }
 
 // التحقق من كلمة مرور الإدارة
@@ -99,7 +150,7 @@ window.submitForm = function() {
       messageBox.style.background = "rgba(34,197,94,0.2)";
       statusSelect.value = "⏳ قيد الانتظار";
 
-      // متابعة الحالة
+      // متابعة الحالة مباشرة
       const reqRef = ref(db, 'طلبات/' + currentRequestKey);
       onValue(reqRef, (snapshot) => {
         const r = snapshot.val();
@@ -116,10 +167,11 @@ window.submitForm = function() {
 
 // قبول الطلب
 window.acceptRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'accepted' }); }
+
 // رفض الطلب
 window.rejectRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'rejected' }); }
 
-// تحميل الطلبات وعرض الحالة مع التاريخ والوقت
+// تحميل الطلبات وعرض الحالة مع ألوان البطاقة وتاريخ التقديم
 window.loadRequests = function() {
   const container = document.getElementById('requests');
   container.innerHTML = '';
@@ -129,24 +181,16 @@ window.loadRequests = function() {
     snapshot.forEach(child => {
       const r = child.val();
       const key = child.key;
+      const statusClass = r.status || 'pending';
+      const statusText = r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار';
+      
+      // تحديد لون البطاقة حسب الحالة
+      let bgColor = r.status === 'accepted' ? 'rgba(34,197,94,0.2)' :
+                    r.status === 'rejected' ? 'rgba(220,38,38,0.2)' :
+                    'rgba(250,204,21,0.2)';
 
-      // تعيين لون خلفية البطاقة حسب الحالة
-      let bgColor = 'rgba(255,255,255,0.05)';
-      if(r.status === 'accepted') bgColor = 'rgba(34,197,94,0.2)';
-      else if(r.status === 'rejected') bgColor = 'rgba(220,38,38,0.2)';
-      else if(r.status === 'pending') bgColor = 'rgba(250,204,21,0.2)';
-
-      // تحويل timestamp إلى صيغة قابلة للعرض
-      let dateTime = '';
-      if(r.timestamp) {
-        const d = new Date(r.timestamp);
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        const hours = String(d.getHours()).padStart(2, '0');
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-        dateTime = `${day}/${month}/${year} - ${hours}:${minutes}`;
-      }
+      const date = new Date(r.timestamp);
+      const formattedDate = date.toLocaleString('ar-EG', { hour12: false });
 
       const div = document.createElement('div');
       div.className = 'card';
@@ -157,12 +201,29 @@ window.loadRequests = function() {
         <b>ID Discord:</b> ${r.discordId}<br>
         <b>الخبرة:</b> ${r.exp}<br>
         <b>السبب:</b> ${r.reason}<br>
-        <b>تاريخ التقديم:</b> ${dateTime}<br>
-        <b>الحالة:</b> <span class="status ${r.status}">${r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span><br>
+        <b>تاريخ التقديم:</b> ${formattedDate}<br>
+        <b>الحالة:</b> <span class="status ${statusClass}">${statusText}</span><br>
         <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
         <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
       `;
       container.appendChild(div);
+    });
+  });
+}
+
+// تحديث حالة الطلب عند تحديث الصفحة
+function updateStatusByDiscord(discordId) {
+  if(!discordId) return;
+  const statusSelect = document.getElementById('statusSelect');
+  const requestsRef = ref(db, 'طلبات');
+  onValue(requestsRef, snapshot => {
+    snapshot.forEach(child => {
+      const r = child.val();
+      if(r.discordId === discordId) {
+        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
+        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
+        else statusSelect.value = "⏳ قيد الانتظار";
+      }
     });
   });
 }
