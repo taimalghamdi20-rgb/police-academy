@@ -17,7 +17,7 @@ section { display:none; padding:30px; }
 .container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
 input, textarea, select { width:100%; margin-top:10px; padding:15px; border:none; border-radius:10px; background:rgba(255,255,255,0.1); color:white; font-size:16px; }
 button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gradient(135deg,#22c55e,#16a34a); border:none; border-radius:12px; cursor:pointer; }
-.card { padding:20px; border-radius:12px; margin-top:15px; position: relative; transition: 0.3s; }
+.card { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-top:15px; position: relative; }
 .card button { margin-left:10px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
 .card button.accept { background:#16a34a; color:white; }
 .card button.reject { background:#dc2626; color:white; }
@@ -61,10 +61,6 @@ window.showPage = function(page) {
   document.getElementById(page).classList.add('active');
   if(page === 'admin' && isAdmin) loadRequests();
   if(page === 'admin') document.getElementById('adminMessage').innerText = '';
-  if(page === 'apply' && localStorage.getItem('discordId')) {
-    const discordId = localStorage.getItem('discordId');
-    updateStatusByDiscord(discordId);
-  }
 }
 
 // التحقق من كلمة مرور الإدارة
@@ -101,11 +97,16 @@ window.submitForm = function() {
       currentRequestKey = snap.key;
       messageBox.innerText = "تم إرسال طلبك بنجاح! 🎉";
       messageBox.style.background = "rgba(34,197,94,0.2)";
-      localStorage.setItem('discordId', discordId);
       statusSelect.value = "⏳ قيد الانتظار";
 
-      // متابعة الحالة فورياً
-      updateStatusByDiscord(discordId);
+      // متابعة الحالة
+      const reqRef = ref(db, 'طلبات/' + currentRequestKey);
+      onValue(reqRef, (snapshot) => {
+        const r = snapshot.val();
+        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
+        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
+        else statusSelect.value = "⏳ قيد الانتظار";
+      });
     })
     .catch(err => {
       messageBox.innerText = "حدث خطأ أثناء الإرسال ❌";
@@ -115,11 +116,10 @@ window.submitForm = function() {
 
 // قبول الطلب
 window.acceptRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'accepted' }); }
-
 // رفض الطلب
 window.rejectRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'rejected' }); }
 
-// تحميل الطلبات وعرض الحالة
+// تحميل الطلبات وعرض الحالة مع التاريخ والوقت
 window.loadRequests = function() {
   const container = document.getElementById('requests');
   container.innerHTML = '';
@@ -136,6 +136,18 @@ window.loadRequests = function() {
       else if(r.status === 'rejected') bgColor = 'rgba(220,38,38,0.2)';
       else if(r.status === 'pending') bgColor = 'rgba(250,204,21,0.2)';
 
+      // تحويل timestamp إلى صيغة قابلة للعرض
+      let dateTime = '';
+      if(r.timestamp) {
+        const d = new Date(r.timestamp);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        dateTime = `${day}/${month}/${year} - ${hours}:${minutes}`;
+      }
+
       const div = document.createElement('div');
       div.className = 'card';
       div.style.background = bgColor;
@@ -145,43 +157,12 @@ window.loadRequests = function() {
         <b>ID Discord:</b> ${r.discordId}<br>
         <b>الخبرة:</b> ${r.exp}<br>
         <b>السبب:</b> ${r.reason}<br>
+        <b>تاريخ التقديم:</b> ${dateTime}<br>
         <b>الحالة:</b> <span class="status ${r.status}">${r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span><br>
         <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
         <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
       `;
       container.appendChild(div);
-    });
-  });
-}
-
-// إشعارات فورية حسب Discord ID
-function updateStatusByDiscord(discordId) {
-  if(!discordId) return;
-  const statusSelect = document.getElementById('statusSelect');
-  const notification = document.getElementById('statusNotification');
-  const requestsRef = ref(db, 'طلبات');
-
-  onValue(requestsRef, snapshot => {
-    snapshot.forEach(child => {
-      const r = child.val();
-      if(r.discordId === discordId) {
-        if(r.status === 'accepted') {
-          statusSelect.value = "✅ مقبول";
-          notification.innerText = "تم قبول طلبك! 🎉";
-          notification.style.background = "rgba(34,197,94,0.2)";
-          notification.style.display = "block";
-        }
-        else if(r.status === 'rejected') {
-          statusSelect.value = "❌ مرفوض";
-          notification.innerText = "تم رفض طلبك ❌";
-          notification.style.background = "rgba(220,38,38,0.2)";
-          notification.style.display = "block";
-        }
-        else {
-          statusSelect.value = "⏳ قيد الانتظار";
-          notification.style.display = "none";
-        }
-      }
     });
   });
 }
@@ -223,8 +204,6 @@ function updateStatusByDiscord(discordId) {
 <section id="apply">
   <div class="container">
     <h2>نموذج التقديم</h2>
-
-    <div id="statusNotification" class="message-box" style="display:none;"></div>
 
     <label for="statusSelect">حالة التقديم:</label>
     <select id="statusSelect" disabled>
