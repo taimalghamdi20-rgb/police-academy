@@ -21,7 +21,6 @@ button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gra
 .card button { margin-left:10px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
 .card button.accept { background:#16a34a; color:white; }
 .card button.reject { background:#dc2626; color:white; }
-.card button.delete { background:#facc15; color:black; }
 .status { font-weight:bold; margin-left:10px; }
 .status.pending { color:yellow; }
 .status.accepted { color:#22c55e; }
@@ -34,7 +33,7 @@ ul { margin-top:10px; padding-left:20px; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -62,10 +61,6 @@ window.showPage = function(page) {
   document.getElementById(page).classList.add('active');
   if(page === 'admin' && isAdmin) loadRequests();
   if(page === 'admin') document.getElementById('adminMessage').innerText = '';
-  if(page === 'apply' && localStorage.getItem('sentRequest')) {
-    const discordId = document.getElementById('discordId').value.trim();
-    updateStatusByDiscord(discordId);
-  }
 }
 
 // التحقق من كلمة مرور الإدارة
@@ -96,19 +91,12 @@ window.submitForm = function() {
     return;
   }
 
-  if(localStorage.getItem('sentRequest')) {
-    messageBox.innerText = "لقد تم إرسال النموذج بالفعل ✅";
-    messageBox.style.background = "rgba(34,197,94,0.2)";
-    return;
-  }
-
   const data = { name, age, discordId, exp, reason, status: 'pending', timestamp: Date.now() };
   push(ref(db, 'طلبات'), data)
     .then((snap) => {
       currentRequestKey = snap.key;
       messageBox.innerText = "تم إرسال طلبك بنجاح! 🎉";
       messageBox.style.background = "rgba(34,197,94,0.2)";
-      localStorage.setItem('sentRequest', 'true');
       statusSelect.value = "⏳ قيد الانتظار";
 
       // متابعة الحالة
@@ -132,23 +120,6 @@ window.acceptRequest = function(id) { update(ref(db, 'طلبات/' + id), { stat
 // رفض الطلب
 window.rejectRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'rejected' }); }
 
-// حذف الطلب
-window.deleteRequest = function(id, discordId) {
-  if(confirm("هل تريد حقًا حذف هذا الطلب؟")) {
-    const requestRef = ref(db, 'طلبات/' + id);
-    requestRef.remove()
-      .then(() => {
-        alert("تم حذف الطلب بنجاح ✅");
-        if(localStorage.getItem('sentRequest') && discordId) {
-          localStorage.removeItem('sentRequest');
-        }
-      })
-      .catch(err => {
-        alert("حدث خطأ أثناء الحذف ❌");
-      });
-  }
-}
-
 // تحميل الطلبات وعرض الحالة
 window.loadRequests = function() {
   const container = document.getElementById('requests');
@@ -171,7 +142,6 @@ window.loadRequests = function() {
         <b>الحالة:</b> <span class="status ${statusClass}">${r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span><br>
         <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
         <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
-        <button class="delete" onclick="deleteRequest('${key}', '${r.discordId}')">حذف</button>
       `;
       container.appendChild(div);
     });
