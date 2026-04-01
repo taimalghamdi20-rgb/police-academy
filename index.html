@@ -25,6 +25,8 @@ button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gra
 .status.pending { color:yellow; }
 .status.accepted { color:#22c55e; }
 .status.rejected { color:#dc2626; }
+.message-box { margin-top:15px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.1); font-weight:bold; text-align:center; }
+input[type="password"] { background:rgba(255,255,255,0.1); color:white; }
 </style>
 
 <script type="module">
@@ -51,52 +53,70 @@ const db = getDatabase(app);
 
 let isAdmin = false;
 
+// التنقل بين الصفحات
 window.showPage = function(page) {
-  if(page === 'admin' && !isAdmin) {
-    let pass = prompt("أدخل كلمة المرور للوصول للإدارة:");
-    if(pass === "Police2026!") isAdmin = true;
-    else { alert("كلمة المرور خاطئة!"); return; }
-  }
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   document.getElementById(page).classList.add('active');
-  if(page === 'admin') loadRequests();
+  if(page === 'admin' && isAdmin) loadRequests();
+  if(page === 'admin') document.getElementById('adminMessage').innerText = '';
 }
 
-// إرسال الطلب مع حالة pending
+// التحقق من كلمة مرور الإدارة
+window.checkAdminPassword = function() {
+  const pass = document.getElementById('adminPass').value;
+  if(pass === "Police2026!") {
+    isAdmin = true;
+    document.getElementById('adminMessage').innerText = "تم تسجيل الدخول بنجاح!";
+    loadRequests();
+  } else {
+    document.getElementById('adminMessage').innerText = "كلمة المرور خاطئة!";
+  }
+}
+
+// إرسال الطلب
 window.submitForm = function() {
-  const data = {
-    name: document.getElementById('name').value,
-    age: document.getElementById('age').value,
-    discordId: document.getElementById('discordId').value,
-    exp: document.getElementById('exp').value,
-    reason: document.getElementById('reason').value,
-    status: 'pending',
-    timestamp: Date.now()
-  };
+  const name = document.getElementById('name').value.trim();
+  const age = document.getElementById('age').value.trim();
+  const discordId = document.getElementById('discordId').value.trim();
+  const exp = document.getElementById('exp').value.trim();
+  const reason = document.getElementById('reason').value.trim();
+  const messageBox = document.getElementById('formMessage');
+
+  // تحقق من ملء جميع الحقول
+  if(!name || !age || !discordId || !exp || !reason) {
+    messageBox.innerText = "يرجى إكمال جميع الحقول قبل الإرسال 🙂";
+    messageBox.style.background = "rgba(220,38,38,0.2)";
+    return;
+  }
+
+  // تحقق إذا أرسل من قبل
+  if(localStorage.getItem('sentRequest')) {
+    messageBox.innerText = "لقد تم إرسال النموذج بالفعل ✅";
+    messageBox.style.background = "rgba(34,197,94,0.2)";
+    return;
+  }
+
+  const data = { name, age, discordId, exp, reason, status: 'pending', timestamp: Date.now() };
   push(ref(db, 'طلبات'), data)
     .then(() => {
-      alert('تم إرسال الطلب');
-      document.getElementById('name').value = '';
-      document.getElementById('age').value = '';
-      document.getElementById('discordId').value = '';
-      document.getElementById('exp').value = '';
-      document.getElementById('reason').value = '';
+      messageBox.innerText = "تم إرسال طلبك بنجاح! 🎉";
+      messageBox.style.background = "rgba(34,197,94,0.2)";
+      localStorage.setItem('sentRequest', 'true');
     })
-    .catch(err => alert('حدث خطأ: ' + err));
+    .catch(err => {
+      messageBox.innerText = "حدث خطأ أثناء الإرسال ❌";
+      messageBox.style.background = "rgba(220,38,38,0.2)";
+    });
 }
 
 // قبول الطلب
 window.acceptRequest = function(id) {
-  update(ref(db, 'طلبات/' + id), { status: 'accepted' })
-    .then(() => {})
-    .catch(err => alert('حدث خطأ: ' + err));
+  update(ref(db, 'طلبات/' + id), { status: 'accepted' });
 }
 
 // رفض الطلب
 window.rejectRequest = function(id) {
-  update(ref(db, 'طلبات/' + id), { status: 'rejected' })
-    .then(() => {})
-    .catch(err => alert('حدث خطأ: ' + err));
+  update(ref(db, 'طلبات/' + id), { status: 'rejected' });
 }
 
 // تحميل الطلبات وعرض الحالة
@@ -126,9 +146,6 @@ window.loadRequests = function() {
     });
   });
 }
-
-setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
-
 </script>
 </head>
 <body>
@@ -157,12 +174,16 @@ setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
     <textarea id="exp" placeholder="الخبرات"></textarea>
     <textarea id="reason" placeholder="سبب التقديم"></textarea>
     <button class="submit" onclick="submitForm()">إرسال</button>
+    <div id="formMessage" class="message-box"></div>
   </div>
 </section>
 
 <section id="admin">
   <div class="container">
     <h2>لوحة الإدارة</h2>
+    <input type="password" id="adminPass" placeholder="أدخل كلمة مرور الإدارة">
+    <button onclick="checkAdminPassword()">تسجيل الدخول</button>
+    <div id="adminMessage" class="message-box"></div>
     <div id="requests"></div>
   </div>
 </section>
