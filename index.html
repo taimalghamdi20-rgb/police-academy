@@ -6,17 +6,9 @@
 <title>Trust | Police Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
-body {
-  font-family: 'Cairo', sans-serif;
-  background: linear-gradient(135deg,#020617,#0f172a,#020617);
-  color: white;
-}
+body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg,#020617,#0f172a,#020617); color: white; }
 header { padding: 25px; text-align: center; font-size: 32px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
 nav { display:flex; justify-content:center; gap:20px; padding:15px; }
 nav button { padding:10px 20px; border:none; border-radius:10px; cursor:pointer; background:#1e293b; color:white; }
@@ -27,6 +19,90 @@ input, textarea { width:100%; margin-top:10px; padding:15px; border:none; border
 button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gradient(135deg,#22c55e,#16a34a); border:none; border-radius:12px; cursor:pointer; }
 .card { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-top:15px; }
 </style>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
+  authDomain: "trust-police-academy.firebaseapp.com",
+  databaseURL: "https://trust-police-academy-default-rtdb.firebaseio.com",
+  projectId: "trust-police-academy",
+  storageBucket: "trust-police-academy.firebasestorage.app",
+  messagingSenderId: "102026443376",
+  appId: "1:102026443376:web:813ffe304b5ba88001d2b5",
+  measurementId: "G-JKZP2DT61T"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+
+// صلاحيات المسؤول
+let isAdmin = false;
+
+// التنقل بين الصفحات
+window.showPage = function(page) {
+  if(page === 'admin' && !isAdmin) {
+    let pass = prompt("أدخل كلمة المرور للوصول للإدارة:");
+    if(pass === "Police2026!") isAdmin = true;
+    else { alert("كلمة المرور خاطئة!"); return; }
+  }
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  if(page === 'admin') loadRequests();
+}
+
+// إرسال الطلب
+window.submitForm = function() {
+  const data = {
+    name: document.getElementById('name').value,
+    age: document.getElementById('age').value,
+    exp: document.getElementById('exp').value,
+    reason: document.getElementById('reason').value,
+    timestamp: Date.now()
+  };
+  push(ref(db, 'طلبات'), data)
+    .then(() => {
+      alert('تم إرسال الطلب');
+      document.getElementById('name').value = '';
+      document.getElementById('age').value = '';
+      document.getElementById('exp').value = '';
+      document.getElementById('reason').value = '';
+    })
+    .catch(err => alert('حدث خطأ: ' + err));
+}
+
+// تحميل الطلبات في لوحة الإدارة
+window.loadRequests = function() {
+  const container = document.getElementById('requests');
+  container.innerHTML = '';
+  const requestsRef = ref(db, 'طلبات');
+  onValue(requestsRef, snapshot => {
+    container.innerHTML = '';
+    snapshot.forEach(child => {
+      const r = child.val();
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <b>الاسم:</b> ${r.name}<br>
+        <b>العمر:</b> ${r.age}<br>
+        <b>الخبرة:</b> ${r.exp}<br>
+        <b>السبب:</b> ${r.reason}
+      `;
+      container.appendChild(div);
+    });
+  });
+}
+
+// تحديث الطلبات تلقائياً
+setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
+</script>
 </head>
 <body>
 
@@ -48,12 +124,10 @@ button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gra
 <section id="apply">
   <div class="container">
     <h2>نموذج التقديم</h2>
-
     <input id="name" placeholder="الاسم الكامل">
     <input id="age" type="number" placeholder="العمر">
     <textarea id="exp" placeholder="الخبرات"></textarea>
     <textarea id="reason" placeholder="سبب التقديم"></textarea>
-
     <button class="submit" onclick="submitForm()">إرسال</button>
   </div>
 </section>
@@ -64,76 +138,6 @@ button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gra
     <div id="requests"></div>
   </div>
 </section>
-
-<script>
-  // مفاتيح Firebase الخاصة بك
-  const firebaseConfig = {
-    apiKey: "AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
-    authDomain: "trust-police-academy.firebaseapp.com",
-    databaseURL: "https://trust-police-academy-default-rtdb.firebaseio.com",
-    projectId: "trust-police-academy",
-    storageBucket: "trust-police-academy.firebasestorage.app",
-    messagingSenderId: "102026443376",
-    appId: "1:102026443376:web:813ffe304b5ba88001d2b5",
-    measurementId: "G-JKZP2DT61T"
-  };
-
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  let isAdmin = false;
-
-  function showPage(page) {
-    if(page === 'admin' && !isAdmin) {
-      let pass = prompt("أدخل كلمة المرور للوصول للإدارة:");
-      if(pass === "Police2026!") isAdmin = true;
-      else { alert("كلمة المرور خاطئة!"); return; }
-    }
-    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-    document.getElementById(page).classList.add('active');
-    if(page === 'admin') loadRequests();
-  }
-
-  function submitForm() {
-    let data = {
-      name: document.getElementById('name').value,
-      age: document.getElementById('age').value,
-      exp: document.getElementById('exp').value,
-      reason: document.getElementById('reason').value,
-      timestamp: Date.now()
-    };
-    db.ref('طلبات').push(data)
-      .then(() => {
-        alert('تم إرسال الطلب');
-        document.getElementById('name').value = '';
-        document.getElementById('age').value = '';
-        document.getElementById('exp').value = '';
-        document.getElementById('reason').value = '';
-      })
-      .catch(err => alert('حدث خطأ: ' + err));
-  }
-
-  function loadRequests() {
-    let container = document.getElementById('requests');
-    container.innerHTML = '';
-    db.ref('طلبات').once('value', snapshot => {
-      snapshot.forEach(childSnapshot => {
-        let r = childSnapshot.val();
-        let div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <b>الاسم:</b> ${r.name}<br>
-          <b>العمر:</b> ${r.age}<br>
-          <b>الخبرة:</b> ${r.exp}<br>
-          <b>السبب:</b> ${r.reason}
-        `;
-        container.appendChild(div);
-      });
-    });
-  }
-
-  setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
-</script>
 
 </body>
 </html>
