@@ -27,6 +27,7 @@ button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gra
 .status.rejected { color:#dc2626; }
 .message-box { margin-top:15px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.1); font-weight:bold; text-align:center; }
 input[type="password"] { background:rgba(255,255,255,0.1); color:white; }
+ul { margin-top:10px; padding-left:20px; }
 </style>
 
 <script type="module">
@@ -60,6 +61,10 @@ window.showPage = function(page) {
   document.getElementById(page).classList.add('active');
   if(page === 'admin' && isAdmin) loadRequests();
   if(page === 'admin') document.getElementById('adminMessage').innerText = '';
+  if(page === 'apply' && localStorage.getItem('sentRequest')) {
+    const discordId = document.getElementById('discordId').value.trim();
+    updateStatusByDiscord(discordId);
+  }
 }
 
 // التحقق من كلمة مرور الإدارة
@@ -152,6 +157,22 @@ window.loadRequests = function() {
   });
 }
 
+// تحديث حالة الطلب حسب ID Discord عند تحديث الصفحة
+function updateStatusByDiscord(discordId) {
+  if(!discordId) return;
+  const statusSelect = document.getElementById('statusSelect');
+  const requestsRef = ref(db, 'طلبات');
+  onValue(requestsRef, snapshot => {
+    snapshot.forEach(child => {
+      const r = child.val();
+      if(r.discordId === discordId) {
+        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
+        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
+        else statusSelect.value = "⏳ قيد الانتظار";
+      }
+    });
+  });
+}
 </script>
 </head>
 <body>
@@ -160,6 +181,7 @@ window.loadRequests = function() {
 
 <nav>
   <button onclick="showPage('home')">الرئيسية</button>
+  <button onclick="showPage('rules')">القوانين</button>
   <button onclick="showPage('apply')">التقديم</button>
   <button onclick="showPage('admin')">الإدارة</button>
 </nav>
@@ -168,6 +190,21 @@ window.loadRequests = function() {
   <div class="container">
     <h2>مرحبا بك في الأكاديمية</h2>
     <p>نظام تقديم احترافي للانضمام إلى الشرطة</p>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="container">
+    <h2>قوانين التقديم</h2>
+    <ul>
+      <li>يجب أن تكون لديك خلفية عن نظام الشرطة وقوانينها</li>
+      <li>يجب أن يكون الاسم بالانجليزي وواقعي</li>
+      <li>يجب الحضور بلبس المحدد</li>
+      <li>يجب احضار الهوية</li>
+      <li>يمنع اي وشوم على الجسم أو الوجه</li>
+      <li>اسم ابو مثل abu ahmed ممنوع</li>
+      <li>يجب عليك الحضور في وقت التقديم المذكور بالأعلى</li>
+    </ul>
   </div>
 </section>
 
