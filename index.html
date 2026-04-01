@@ -17,14 +17,17 @@ section { display:none; padding:30px; }
 .container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
 input, textarea { width:100%; margin-top:10px; padding:15px; border:none; border-radius:10px; background:rgba(255,255,255,0.1); color:white; font-size:16px; }
 button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gradient(135deg,#22c55e,#16a34a); border:none; border-radius:12px; cursor:pointer; }
-.card { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-top:15px; }
+.card { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-top:15px; position: relative; }
+.card button { margin-left:10px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+.card button.accept { background:#16a34a; color:white; }
+.card button.reject { background:#dc2626; color:white; }
 </style>
 
 <!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -63,6 +66,7 @@ window.submitForm = function() {
   const data = {
     name: document.getElementById('name').value,
     age: document.getElementById('age').value,
+    discordId: document.getElementById('discordId').value,
     exp: document.getElementById('exp').value,
     reason: document.getElementById('reason').value,
     timestamp: Date.now()
@@ -72,9 +76,24 @@ window.submitForm = function() {
       alert('تم إرسال الطلب');
       document.getElementById('name').value = '';
       document.getElementById('age').value = '';
+      document.getElementById('discordId').value = '';
       document.getElementById('exp').value = '';
       document.getElementById('reason').value = '';
     })
+    .catch(err => alert('حدث خطأ: ' + err));
+}
+
+// قبول الطلب
+window.acceptRequest = function(id) {
+  remove(ref(db, 'طلبات/' + id))
+    .then(() => alert('تم قبول الطلب وحذفه من القائمة'))
+    .catch(err => alert('حدث خطأ: ' + err));
+}
+
+// رفض الطلب
+window.rejectRequest = function(id) {
+  remove(ref(db, 'طلبات/' + id))
+    .then(() => alert('تم رفض الطلب وحذفه من القائمة'))
     .catch(err => alert('حدث خطأ: ' + err));
 }
 
@@ -87,21 +106,26 @@ window.loadRequests = function() {
     container.innerHTML = '';
     snapshot.forEach(child => {
       const r = child.val();
+      const key = child.key;
       const div = document.createElement('div');
       div.className = 'card';
       div.innerHTML = `
         <b>الاسم:</b> ${r.name}<br>
         <b>العمر:</b> ${r.age}<br>
+        <b>ID Discord:</b> ${r.discordId}<br>
         <b>الخبرة:</b> ${r.exp}<br>
-        <b>السبب:</b> ${r.reason}
+        <b>السبب:</b> ${r.reason}<br>
+        <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
+        <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
       `;
       container.appendChild(div);
     });
   });
 }
 
-// تحديث الطلبات تلقائياً
+// تحديث تلقائي للطلبات
 setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
+
 </script>
 </head>
 <body>
@@ -126,6 +150,7 @@ setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
     <h2>نموذج التقديم</h2>
     <input id="name" placeholder="الاسم الكامل">
     <input id="age" type="number" placeholder="العمر">
+    <input id="discordId" placeholder="ID Discord">
     <textarea id="exp" placeholder="الخبرات"></textarea>
     <textarea id="reason" placeholder="سبب التقديم"></textarea>
     <button class="submit" onclick="submitForm()">إرسال</button>
