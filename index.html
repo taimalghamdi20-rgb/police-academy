@@ -21,13 +21,16 @@ button.submit { margin-top:20px; padding:15px; width:100%; background:linear-gra
 .card button { margin-left:10px; padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
 .card button.accept { background:#16a34a; color:white; }
 .card button.reject { background:#dc2626; color:white; }
+.status { font-weight:bold; margin-left:10px; }
+.status.pending { color:yellow; }
+.status.accepted { color:#22c55e; }
+.status.rejected { color:#dc2626; }
 </style>
 
-<!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -46,10 +49,8 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getDatabase(app);
 
-// صلاحيات المسؤول
 let isAdmin = false;
 
-// التنقل بين الصفحات
 window.showPage = function(page) {
   if(page === 'admin' && !isAdmin) {
     let pass = prompt("أدخل كلمة المرور للوصول للإدارة:");
@@ -61,7 +62,7 @@ window.showPage = function(page) {
   if(page === 'admin') loadRequests();
 }
 
-// إرسال الطلب
+// إرسال الطلب مع حالة pending
 window.submitForm = function() {
   const data = {
     name: document.getElementById('name').value,
@@ -69,6 +70,7 @@ window.submitForm = function() {
     discordId: document.getElementById('discordId').value,
     exp: document.getElementById('exp').value,
     reason: document.getElementById('reason').value,
+    status: 'pending',
     timestamp: Date.now()
   };
   push(ref(db, 'طلبات'), data)
@@ -85,19 +87,19 @@ window.submitForm = function() {
 
 // قبول الطلب
 window.acceptRequest = function(id) {
-  remove(ref(db, 'طلبات/' + id))
-    .then(() => alert('تم قبول الطلب وحذفه من القائمة'))
+  update(ref(db, 'طلبات/' + id), { status: 'accepted' })
+    .then(() => {})
     .catch(err => alert('حدث خطأ: ' + err));
 }
 
 // رفض الطلب
 window.rejectRequest = function(id) {
-  remove(ref(db, 'طلبات/' + id))
-    .then(() => alert('تم رفض الطلب وحذفه من القائمة'))
+  update(ref(db, 'طلبات/' + id), { status: 'rejected' })
+    .then(() => {})
     .catch(err => alert('حدث خطأ: ' + err));
 }
 
-// تحميل الطلبات في لوحة الإدارة
+// تحميل الطلبات وعرض الحالة
 window.loadRequests = function() {
   const container = document.getElementById('requests');
   container.innerHTML = '';
@@ -107,6 +109,7 @@ window.loadRequests = function() {
     snapshot.forEach(child => {
       const r = child.val();
       const key = child.key;
+      const statusClass = r.status || 'pending';
       const div = document.createElement('div');
       div.className = 'card';
       div.innerHTML = `
@@ -115,6 +118,7 @@ window.loadRequests = function() {
         <b>ID Discord:</b> ${r.discordId}<br>
         <b>الخبرة:</b> ${r.exp}<br>
         <b>السبب:</b> ${r.reason}<br>
+        <b>الحالة:</b> <span class="status ${statusClass}">${r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span><br>
         <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
         <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
       `;
@@ -123,7 +127,6 @@ window.loadRequests = function() {
   });
 }
 
-// تحديث تلقائي للطلبات
 setInterval(() => { if(isAdmin) loadRequests(); }, 2000);
 
 </script>
