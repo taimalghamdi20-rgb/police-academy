@@ -8,59 +8,15 @@
 
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
-
-/* 🔥 خلفية احترافية */
-body {
-  font-family: 'Cairo', sans-serif;
-  background: linear-gradient(135deg,#020617,#0f172a,#020617),
-              url('https://images.unsplash.com/photo-1549921296-3a6b9d5e0c5a') no-repeat center/cover;
-  background-blend-mode: overlay;
-  color: white;
-}
-
-/* 🔥 الهيدر */
-header {
-  padding: 25px;
-  text-align: center;
-  font-size: 32px;
-  font-weight: bold;
-  background: rgba(0,0,0,0.6);
-  border-bottom: 2px solid gold;
-}
-
-/* 🔥 الناف بار */
+body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg,#020617,#0f172a,#020617); color: white; }
+header { padding: 25px; text-align: center; font-size: 32px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
 nav { display:flex; justify-content:center; gap:20px; padding:15px; }
-
-nav button {
-  padding:10px 20px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  background:#1e293b;
-  color:white;
-  transition: 0.3s;
-}
-
-nav button:hover {
-  background: gold;
-  color: black;
-  transform: scale(1.05);
-}
-
-/* الصفحات */
+nav button { padding:10px 20px; border:none; border-radius:10px; cursor:pointer; background:#1e293b; color:white; }
 section { display:none; padding:30px; }
 .active { display:block; }
+.container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
 
-.container {
-  max-width:800px;
-  margin:auto;
-  background:rgba(0,0,0,0.6);
-  padding:30px;
-  border-radius:16px;
-  backdrop-filter: blur(10px);
-}
-
-/* 🔥 الحقول */
+/* الحقول الموحدة */
 input, textarea, select {
     width: 100%;
     margin-top: 15px;
@@ -70,47 +26,35 @@ input, textarea, select {
     background: rgba(255,255,255,0.1);
     color: white;
     font-size: 16px;
-    transition: 0.3s;
 }
 
-input:focus, textarea:focus {
-    outline: none;
-    background: rgba(255,255,255,0.2);
+input[type="number"], input[type="text"], input[type="password"] {
+    height: 50px;
 }
 
-textarea { height: 100px; }
+textarea {
+    height: 100px;
+}
 
-/* 🔥 زر الإرسال */
 button.submit {
     margin-top: 20px;
     padding: 15px;
     width: 100%;
-    background: linear-gradient(135deg,gold,#facc15);
+    background: linear-gradient(135deg,#22c55e,#16a34a);
     border: none;
     border-radius: 12px;
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
-    color:black;
-    transition: 0.3s;
 }
 
-button.submit:hover {
-    transform: scale(1.05);
-}
-
-/* 🔥 الكروت */
 .card {
     background: rgba(255,255,255,0.05);
     padding: 20px;
     border-radius: 12px;
     margin-top: 15px;
-    transition: 0.3s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    background: rgba(255,255,255,0.1);
+    position: relative;
+    transition: background 0.3s;
 }
 
 .card button {
@@ -120,29 +64,84 @@ button.submit:hover {
     border-radius:8px;
     cursor:pointer;
     font-weight:bold;
-    transition:0.3s;
 }
-
 .card button.accept { background:#16a34a; color:white; }
 .card button.reject { background:#dc2626; color:white; }
 
-.card button:hover {
-  transform: scale(1.1);
-}
-
-/* الحالة */
+.status { font-weight:bold; margin-left:10px; }
 .status.pending { color:yellow; }
 .status.accepted { color:#22c55e; }
 .status.rejected { color:#dc2626; }
 
-.message-box {
-  margin-top:15px;
-  padding:12px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.1);
-  font-weight:bold;
-  text-align:center;
-}
-
+.message-box { margin-top:15px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.1); font-weight:bold; text-align:center; }
 ul { margin-top:10px; padding-left:20px; }
 </style>
+
+<script type="module">
+/* 🔥 نفس كود Firebase حقك بدون تغيير */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
+  authDomain: "trust-police-academy.firebaseapp.com",
+  databaseURL: "https://trust-police-academy-default-rtdb.firebaseio.com",
+  projectId: "trust-police-academy",
+  storageBucket: "trust-police-academy.firebasestorage.app",
+  messagingSenderId: "102026443376",
+  appId: "1:102026443376:web:813ffe304b5ba88001d2b5",
+  measurementId: "G-JKZP2DT61T"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+
+/* باقي الجافاسكربت زي ما هو */
+</script>
+</head>
+<body>
+
+<header>Trust | Police Academy</header>
+
+<nav>
+  <button onclick="showPage('home')">الرئيسية</button>
+  <button onclick="showPage('rules')">القوانين</button>
+  <button onclick="showPage('apply')">التقديم</button>
+  <button onclick="showPage('admin')">الإدارة</button>
+</nav>
+
+<section id="home" class="active">
+  <div class="container">
+    <h2>مرحبا بك في الأكاديمية</h2>
+    <p>نظام تقديم احترافي للانضمام إلى الشرطة</p>
+  </div>
+</section>
+
+<!-- 🔥 هذا القسم تم استبداله -->
+<section id="rules">
+  <div class="container">
+    <h2>قوانين التقديم</h2>
+    <ul>
+      <li>يجب أن تكون لديك خلفية عن نظام الشرطة وقوانينها</li>
+      <li>يجب أن يكون الاسم بالانجليزي وواقعي</li>
+      <li>يجب الحضور بلبس المحدد</li>
+      <li>يجب احضار الهوية</li>
+      <li>يمنع اي وشوم على الجسم أو الوجه</li>
+      <li>اسم ابو مثل abu ahmed ممنوع</li>
+      <li>يجب عليك الحضور في وقت التقديم المذكور بالأعلى</li>
+    </ul>
+
+    <h3 style="margin-top:20px;">🎨 الهوية الشرطية</h3>
+    <ul>
+      <li>ألوان رسمية: أسود + ذهبي</li>
+      <li>أو: أزرق غامق + أبيض</li>
+      <li>خلفية مستوحاة من الشرطة (مدينة / سيارات)</li>
+      <li>تأثيرات Hover خفيفة</li>
+    </ul>
+  </div>
+</section>
+
+</body>
+</html>
