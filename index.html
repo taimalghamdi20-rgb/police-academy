@@ -8,75 +8,6 @@
 
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
-body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg,#020617,#0f172a,#020617); color: white; }
-header { padding: 25px; text-align: center; font-size: 32px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
-nav { display:flex; justify-content:center; gap:20px; padding:15px; }
-nav button { padding:10px 20px; border:none; border-radius:10px; cursor:pointer; background:#1e293b; color:white; }
-section { display:none; padding:30px; }
-.active { display:block; }
-.container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
-
-/* الحقول الموحدة */
-input, textarea, select {
-    width: 100%;
-    margin-top: 15px;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    font-size: 16px;
-}
-
-input[type="number"], input[type="text"], input[type="password"] {
-    height: 50px; /* ارتفاع موحد للحقل */
-}
-
-textarea {
-    height: 100px; /* ارتفاع أكبر للنصوص الطويلة */
-}
-
-button.submit {
-    margin-top: 20px;
-    padding: 15px;
-    width: 100%;
-    background: linear-gradient(135deg,#22c55e,#16a34a);
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.card {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 15px;
-    position: relative;
-    transition: background 0.3s;
-}
-
-.card button {
-    margin-left:10px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-}
-.card button.accept { background:#16a34a; color:white; }
-.card button.reject { background:#dc2626; color:white; }
-
-.status { font-weight:bold; margin-left:10px; }
-.status.pending { color:yellow; }
-.status.accepted { color:#22c55e; }
-.status.rejected { color:#dc2626; }
-
-.message-box { margin-top:15px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.1); font-weight:bold; text-align:center; }
-ul { margin-top:10px; padding-left:20px; }
-<style>
-* { box-sizing: border-box; margin:0; padding:0; }
 
 /* 🔥 خلفية احترافية */
 body {
@@ -85,6 +16,7 @@ body {
               url('https://images.unsplash.com/photo-1549921296-3a6b9d5e0c5a') no-repeat center/cover;
   background-blend-mode: overlay;
   color: white;
+  min-height: 100vh;
 }
 
 /* 🔥 الهيدر */
@@ -93,9 +25,9 @@ header {
   text-align: center;
   font-size: 32px;
   font-weight: bold;
-  background: rgba(0,0,0,0.6);
+  background: rgba(255,255,255,0.05);
   border-bottom: 2px solid gold;
-  letter-spacing: 1px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
 }
 
 /* 🔥 الناف بار */
@@ -108,13 +40,14 @@ nav button {
   cursor:pointer;
   background:#1e293b;
   color:white;
+  font-weight:bold;
   transition: 0.3s;
 }
 
 nav button:hover {
   background: gold;
   color: black;
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 /* الصفحات */
@@ -125,14 +58,14 @@ section { display:none; padding:30px; }
 .container {
   max-width:800px;
   margin:auto;
-  background:rgba(0,0,0,0.6);
+  background:rgba(255,255,255,0.05);
   padding:30px;
   border-radius:16px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
-/* 🔥 الحقول */
+/* الحقول */
 input, textarea, select {
     width: 100%;
     margin-top: 15px;
@@ -154,7 +87,9 @@ input:focus, textarea:focus {
     background: rgba(255,255,255,0.2);
 }
 
-textarea { height: 100px; }
+textarea {
+    height: 100px;
+}
 
 /* 🔥 زر الإرسال */
 button.submit {
@@ -187,7 +122,7 @@ button.submit:hover {
 }
 
 .card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
     background: rgba(255,255,255,0.1);
 }
 
@@ -223,11 +158,22 @@ button.submit:hover {
   background:rgba(255,255,255,0.1);
   font-weight:bold;
   text-align:center;
-  border:1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 ul { margin-top:10px; padding-left:20px; }
+ul li { margin-bottom:10px; }
+
+/* 🔥 تحسين النص */
+h2 { margin-bottom: 15px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+p { font-size:18px; line-height:1.6; }
 </style>
+
+<!-- 🔥 باقي كودك (Firebase + JS) بدون أي تعديل -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -297,7 +243,6 @@ window.submitForm = function() {
       messageBox.style.background = "rgba(34,197,94,0.2)";
       statusSelect.value = "⏳ قيد الانتظار";
 
-      // متابعة الحالة مباشرة
       const reqRef = ref(db, 'طلبات/' + currentRequestKey);
       onValue(reqRef, (snapshot) => {
         const r = snapshot.val();
@@ -318,7 +263,7 @@ window.acceptRequest = function(id) { update(ref(db, 'طلبات/' + id), { stat
 // رفض الطلب
 window.rejectRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'rejected' }); }
 
-// تحميل الطلبات وعرض الحالة مع ألوان البطاقة وتاريخ التقديم
+// تحميل الطلبات وعرض الحالة
 window.loadRequests = function() {
   const container = document.getElementById('requests');
   container.innerHTML = '';
@@ -331,7 +276,6 @@ window.loadRequests = function() {
       const statusClass = r.status || 'pending';
       const statusText = r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار';
       
-      // تحديد لون البطاقة حسب الحالة
       let bgColor = r.status === 'accepted' ? 'rgba(34,197,94,0.2)' :
                     r.status === 'rejected' ? 'rgba(220,38,38,0.2)' :
                     'rgba(250,204,21,0.2)';
