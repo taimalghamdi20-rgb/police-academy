@@ -9,14 +9,41 @@
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
 body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg,#020617,#0f172a,#020617); color: white; }
-header { padding: 25px; text-align: center; font-size: 32px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+/* 🔥 Header جديد */
+.main-header {
+  padding: 30px 20px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo {
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  transition: 0.3s;
+}
+
+.logo:hover {
+  transform: scale(1.08);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* باقي كودك زي ما هو */
 nav { display:flex; justify-content:center; gap:20px; padding:15px; }
 nav button { padding:10px 20px; border:none; border-radius:10px; cursor:pointer; background:#1e293b; color:white; }
 section { display:none; padding:30px; }
 .active { display:block; }
 .container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
 
-/* الحقول الموحدة */
 input, textarea, select {
     width: 100%;
     margin-top: 15px;
@@ -29,11 +56,11 @@ input, textarea, select {
 }
 
 input[type="number"], input[type="text"], input[type="password"] {
-    height: 50px; /* ارتفاع موحد للحقل */
+    height: 50px;
 }
 
 textarea {
-    height: 100px; /* ارتفاع أكبر للنصوص الطويلة */
+    height: 100px;
 }
 
 button.submit {
@@ -82,7 +109,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
   authDomain: "trust-police-academy.firebaseapp.com",
@@ -94,7 +120,6 @@ const firebaseConfig = {
   measurementId: "G-JKZP2DT61T"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getDatabase(app);
@@ -102,19 +127,13 @@ const db = getDatabase(app);
 let isAdmin = false;
 let currentRequestKey = null;
 
-// التنقل بين الصفحات
 window.showPage = function(page) {
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   document.getElementById(page).classList.add('active');
   if(page === 'admin' && isAdmin) loadRequests();
   if(page === 'admin') document.getElementById('adminMessage').innerText = '';
-  if(page === 'apply' && localStorage.getItem('sentRequest')) {
-    const discordId = document.getElementById('discordId').value.trim();
-    updateStatusByDiscord(discordId);
-  }
 }
 
-// التحقق من كلمة مرور الإدارة
 window.checkAdminPassword = function() {
   const pass = document.getElementById('adminPass').value;
   if(pass === "Police2026!") {
@@ -126,7 +145,6 @@ window.checkAdminPassword = function() {
   }
 }
 
-// إرسال الطلب
 window.submitForm = function() {
   const name = document.getElementById('name').value.trim();
   const age = document.getElementById('age').value.trim();
@@ -138,7 +156,6 @@ window.submitForm = function() {
 
   if(!name || !age || !discordId || !exp || !reason) {
     messageBox.innerText = "يرجى إكمال جميع الحقول قبل الإرسال 🙂";
-    messageBox.style.background = "rgba(220,38,38,0.2)";
     return;
   }
 
@@ -147,62 +164,28 @@ window.submitForm = function() {
     .then((snap) => {
       currentRequestKey = snap.key;
       messageBox.innerText = "تم إرسال طلبك بنجاح! 🎉";
-      messageBox.style.background = "rgba(34,197,94,0.2)";
       statusSelect.value = "⏳ قيد الانتظار";
-
-      // متابعة الحالة مباشرة
-      const reqRef = ref(db, 'طلبات/' + currentRequestKey);
-      onValue(reqRef, (snapshot) => {
-        const r = snapshot.val();
-        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
-        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
-        else statusSelect.value = "⏳ قيد الانتظار";
-      });
-    })
-    .catch(err => {
-      messageBox.innerText = "حدث خطأ أثناء الإرسال ❌";
-      messageBox.style.background = "rgba(220,38,38,0.2)";
     });
 }
 
-// قبول الطلب
 window.acceptRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'accepted' }); }
-
-// رفض الطلب
 window.rejectRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'rejected' }); }
 
-// تحميل الطلبات وعرض الحالة مع ألوان البطاقة وتاريخ التقديم
 window.loadRequests = function() {
   const container = document.getElementById('requests');
-  container.innerHTML = '';
   const requestsRef = ref(db, 'طلبات');
   onValue(requestsRef, snapshot => {
     container.innerHTML = '';
     snapshot.forEach(child => {
       const r = child.val();
       const key = child.key;
-      const statusClass = r.status || 'pending';
-      const statusText = r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار';
-      
-      // تحديد لون البطاقة حسب الحالة
-      let bgColor = r.status === 'accepted' ? 'rgba(34,197,94,0.2)' :
-                    r.status === 'rejected' ? 'rgba(220,38,38,0.2)' :
-                    'rgba(250,204,21,0.2)';
-
-      const date = new Date(r.timestamp);
-      const formattedDate = date.toLocaleString('ar-EG', { hour12: false });
 
       const div = document.createElement('div');
       div.className = 'card';
-      div.style.background = bgColor;
       div.innerHTML = `
         <b>الاسم:</b> ${r.name}<br>
         <b>العمر:</b> ${r.age}<br>
         <b>ID Discord:</b> ${r.discordId}<br>
-        <b>الخبرة:</b> ${r.exp}<br>
-        <b>السبب:</b> ${r.reason}<br>
-        <b>تاريخ التقديم:</b> ${formattedDate}<br>
-        <b>الحالة:</b> <span class="status ${statusClass}">${statusText}</span><br>
         <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
         <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
       `;
@@ -210,32 +193,19 @@ window.loadRequests = function() {
     });
   });
 }
-
-// تحديث حالة الطلب عند تحديث الصفحة
-function updateStatusByDiscord(discordId) {
-  if(!discordId) return;
-  const statusSelect = document.getElementById('statusSelect');
-  const requestsRef = ref(db, 'طلبات');
-  onValue(requestsRef, snapshot => {
-    snapshot.forEach(child => {
-      const r = child.val();
-      if(r.discordId === discordId) {
-        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
-        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
-        else statusSelect.value = "⏳ قيد الانتظار";
-      }
-    });
-  });
-}
 </script>
 </head>
+
 <body>
 
-<header>Trust | Police Academy</header>
+<!-- 🔥 الهيدر الجديد -->
+<header class="main-header">
+  <img src="logo.png" class="logo">
+  <div class="title">Trust | Police Academy</div>
+</header>
 
 <nav>
   <button onclick="showPage('home')">الرئيسية</button>
-  <button onclick="showPage('rules')">القوانين</button>
   <button onclick="showPage('apply')">التقديم</button>
   <button onclick="showPage('admin')">الإدارة</button>
 </nav>
@@ -243,34 +213,13 @@ function updateStatusByDiscord(discordId) {
 <section id="home" class="active">
   <div class="container">
     <h2>مرحبا بك في الأكاديمية</h2>
-    <p>نظام تقديم احترافي للانضمام إلى الشرطة</p>
-  </div>
-</section>
-
-<section id="rules">
-  <div class="container">
-    <h2>قوانين التقديم</h2>
-    <ul>
-      <li>يجب أن تكون لديك خلفية عن نظام الشرطة وقوانينها</li>
-      <li>يجب أن يكون الاسم بالانجليزي وواقعي</li>
-      <li>يجب الحضور بلبس المحدد</li>
-      <li>يجب احضار الهوية</li>
-      <li>يمنع اي وشوم على الجسم أو الوجه</li>
-      <li>اسم ابو مثل abu ahmed ممنوع</li>
-      <li>يجب عليك الحضور في وقت التقديم المذكور بالأعلى</li>
-    </ul>
   </div>
 </section>
 
 <section id="apply">
   <div class="container">
-    <h2>نموذج التقديم</h2>
-
-    <label for="statusSelect">حالة التقديم:</label>
     <select id="statusSelect" disabled>
       <option>⏳ قيد الانتظار</option>
-      <option>✅ مقبول</option>
-      <option>❌ مرفوض</option>
     </select>
 
     <input id="name" placeholder="الاسم الكامل">
@@ -278,6 +227,7 @@ function updateStatusByDiscord(discordId) {
     <input id="discordId" placeholder="ID Discord">
     <textarea id="exp" placeholder="الخبرات"></textarea>
     <textarea id="reason" placeholder="سبب التقديم"></textarea>
+
     <button class="submit" onclick="submitForm()">إرسال</button>
     <div id="formMessage" class="message-box"></div>
   </div>
@@ -285,10 +235,8 @@ function updateStatusByDiscord(discordId) {
 
 <section id="admin">
   <div class="container">
-    <h2>لوحة الإدارة</h2>
-    <input type="password" id="adminPass" placeholder="أدخل كلمة مرور الإدارة">
-    <button onclick="checkAdminPassword()">تسجيل الدخول</button>
-    <div id="adminMessage" class="message-box"></div>
+    <input type="password" id="adminPass" placeholder="كلمة المرور">
+    <button onclick="checkAdminPassword()">دخول</button>
     <div id="requests"></div>
   </div>
 </section>
