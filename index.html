@@ -8,277 +8,290 @@
 
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
-
-body {
-  font-family: 'Cairo', sans-serif;
-  background: linear-gradient(135deg,#020617,#1e293b,#020617);
-  color: white;
-}
-
-/* Header احترافي */
-header {
-  padding: 25px;
-  text-align: center;
-  font-size: 32px;
-  font-weight: bold;
-  background: linear-gradient(135deg,#22c55e,#16a34a);
-  letter-spacing: 1px;
-}
-
-/* NAV */
-nav {
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  padding:15px;
-}
-
-nav button {
-  padding:10px 20px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  background:#1e293b;
-  color:white;
-  transition:0.2s;
-}
-
-/* Hover */
-nav button:hover,
-button.submit:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg,#4ade80,#22c55e);
-}
-
-/* Sections */
+body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg,#020617,#0f172a,#020617); color: white; }
+header { padding: 25px; text-align: center; font-size: 32px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
+nav { display:flex; justify-content:center; gap:20px; padding:15px; }
+nav button { padding:10px 20px; border:none; border-radius:10px; cursor:pointer; background:#1e293b; color:white; }
 section { display:none; padding:30px; }
 .active { display:block; }
+.container { max-width:800px; margin:auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; }
 
-/* Container */
-.container {
-  max-width:800px;
-  margin:auto;
-  background:rgba(255,255,255,0.05);
-  padding:30px;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.4);
-  animation:fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(20px);}
-  to {opacity:1; transform:translateY(0);}
-}
-
-/* الفورم */
+/* الحقول الموحدة */
 input, textarea, select {
-  width:100%;
-  margin-top:15px;
-  padding:15px;
-  border-radius:12px;
-  border:none;
-  background:rgba(255,255,255,0.1);
-  color:white;
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
 }
 
-input:focus, textarea:focus {
-  outline:none;
-  border:1px solid #22c55e;
-  background:rgba(255,255,255,0.15);
+input[type="number"], input[type="text"], input[type="password"] {
+    height: 50px; /* ارتفاع موحد للحقل */
 }
 
-textarea { height:100px; }
+textarea {
+    height: 100px; /* ارتفاع أكبر للنصوص الطويلة */
+}
 
 button.submit {
-  margin-top:20px;
-  padding:15px;
-  width:100%;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:bold;
-  background: linear-gradient(135deg,#22c55e,#16a34a);
+    margin-top: 20px;
+    padding: 15px;
+    width: 100%;
+    background: linear-gradient(135deg,#22c55e,#16a34a);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
 }
 
-/* Cards */
 .card {
-  padding:20px;
-  border-radius:12px;
-  margin-top:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 15px;
+    position: relative;
+    transition: background 0.3s;
 }
 
-/* Buttons */
-.accept { background:#16a34a; color:white; }
-.reject { background:#dc2626; color:white; }
-
-/* Toast */
-.toast {
-  position:fixed;
-  top:20px;
-  right:20px;
-  background:#22c55e;
-  padding:15px;
-  border-radius:10px;
-  display:none;
+.card button {
+    margin-left:10px;
+    padding:6px 12px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
 }
+.card button.accept { background:#16a34a; color:white; }
+.card button.reject { background:#dc2626; color:white; }
 
-/* Search */
-#search {
-  margin-top:10px;
-  margin-bottom:15px;
-}
+.status { font-weight:bold; margin-left:10px; }
+.status.pending { color:yellow; }
+.status.accepted { color:#22c55e; }
+.status.rejected { color:#dc2626; }
+
+.message-box { margin-top:15px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.1); font-weight:bold; text-align:center; }
+ul { margin-top:10px; padding-left:20px; }
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
   authDomain: "trust-police-academy.firebaseapp.com",
   databaseURL: "https://trust-police-academy-default-rtdb.firebaseio.com",
   projectId: "trust-police-academy",
+  storageBucket: "trust-police-academy.firebasestorage.app",
+  messagingSenderId: "102026443376",
+  appId: "1:102026443376:web:813ffe304b5ba88001d2b5",
+  measurementId: "G-JKZP2DT61T"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const db = getDatabase(app);
 
-let requestNumber = 1;
+let isAdmin = false;
+let currentRequestKey = null;
 
-/* Toast */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.innerText = msg;
-  t.style.display = "block";
-  setTimeout(()=> t.style.display="none",3000);
+// التنقل بين الصفحات
+window.showPage = function(page) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  if(page === 'admin' && isAdmin) loadRequests();
+  if(page === 'admin') document.getElementById('adminMessage').innerText = '';
+  if(page === 'apply' && localStorage.getItem('sentRequest')) {
+    const discordId = document.getElementById('discordId').value.trim();
+    updateStatusByDiscord(discordId);
+  }
 }
 
-/* إرسال */
+// التحقق من كلمة مرور الإدارة
+window.checkAdminPassword = function() {
+  const pass = document.getElementById('adminPass').value;
+  if(pass === "Police2026!") {
+    isAdmin = true;
+    document.getElementById('adminMessage').innerText = "تم تسجيل الدخول بنجاح!";
+    loadRequests();
+  } else {
+    document.getElementById('adminMessage').innerText = "كلمة المرور خاطئة!";
+  }
+}
+
+// إرسال الطلب
 window.submitForm = function() {
   const name = document.getElementById('name').value.trim();
   const age = document.getElementById('age').value.trim();
   const discordId = document.getElementById('discordId').value.trim();
   const exp = document.getElementById('exp').value.trim();
   const reason = document.getElementById('reason').value.trim();
-  const msg = document.getElementById('formMessage');
+  const statusSelect = document.getElementById('statusSelect');
+  const messageBox = document.getElementById('formMessage');
 
-  if(!name || !age || !discordId || !exp || !reason){
-    msg.innerText="❌ يرجى تعبئة جميع الحقول";
+  if(!name || !age || !discordId || !exp || !reason) {
+    messageBox.innerText = "يرجى إكمال جميع الحقول قبل الإرسال 🙂";
+    messageBox.style.background = "rgba(220,38,38,0.2)";
     return;
   }
 
-  msg.innerText="⏳ جاري الإرسال...";
+  const data = { name, age, discordId, exp, reason, status: 'pending', timestamp: Date.now() };
+  push(ref(db, 'طلبات'), data)
+    .then((snap) => {
+      currentRequestKey = snap.key;
+      messageBox.innerText = "تم إرسال طلبك بنجاح! 🎉";
+      messageBox.style.background = "rgba(34,197,94,0.2)";
+      statusSelect.value = "⏳ قيد الانتظار";
 
-  push(ref(db,'طلبات'), {
-    name, age, discordId, exp, reason,
-    status:'pending',
-    timestamp: Date.now(),
-    number: requestNumber++
-  }).then(()=>{
-    msg.innerText="✅ تم إرسال الطلب";
-    showToast("تم إرسال الطلب بنجاح 🎉");
-  });
+      // متابعة الحالة مباشرة
+      const reqRef = ref(db, 'طلبات/' + currentRequestKey);
+      onValue(reqRef, (snapshot) => {
+        const r = snapshot.val();
+        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
+        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
+        else statusSelect.value = "⏳ قيد الانتظار";
+      });
+    })
+    .catch(err => {
+      messageBox.innerText = "حدث خطأ أثناء الإرسال ❌";
+      messageBox.style.background = "rgba(220,38,38,0.2)";
+    });
 }
 
-/* تحميل الطلبات */
+// قبول الطلب
+window.acceptRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'accepted' }); }
+
+// رفض الطلب
+window.rejectRequest = function(id) { update(ref(db, 'طلبات/' + id), { status: 'rejected' }); }
+
+// تحميل الطلبات وعرض الحالة مع ألوان البطاقة وتاريخ التقديم
 window.loadRequests = function() {
   const container = document.getElementById('requests');
-
-  onValue(ref(db,'طلبات'), snap=>{
-    container.innerHTML='';
-    snap.forEach(child=>{
+  container.innerHTML = '';
+  const requestsRef = ref(db, 'طلبات');
+  onValue(requestsRef, snapshot => {
+    container.innerHTML = '';
+    snapshot.forEach(child => {
       const r = child.val();
+      const key = child.key;
+      const statusClass = r.status || 'pending';
+      const statusText = r.status === 'accepted' ? '✅ مقبول' : r.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار';
+      
+      // تحديد لون البطاقة حسب الحالة
+      let bgColor = r.status === 'accepted' ? 'rgba(34,197,94,0.2)' :
+                    r.status === 'rejected' ? 'rgba(220,38,38,0.2)' :
+                    'rgba(250,204,21,0.2)';
 
-      let bg = r.status=='accepted' ? 'rgba(34,197,94,0.2)'
-              : r.status=='rejected' ? 'rgba(220,38,38,0.2)'
-              : 'rgba(250,204,21,0.2)';
+      const date = new Date(r.timestamp);
+      const formattedDate = date.toLocaleString('ar-EG', { hour12: false });
 
-      const div=document.createElement('div');
-      div.className='card';
-      div.style.background=bg;
-
-      div.innerHTML=`
-      🧾 رقم الطلب: ${r.number}<br>
-      👤 ${r.name}<br>
-      🆔 ${r.discordId}<br>
-      ⏱ ${new Date(r.timestamp).toLocaleString()}<br>
-      الحالة: ${r.status}<br>
-      <button class="accept" onclick="updateStatus('${child.key}','accepted')">قبول</button>
-      <button class="reject" onclick="updateStatus('${child.key}','rejected')">رفض</button>
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.background = bgColor;
+      div.innerHTML = `
+        <b>الاسم:</b> ${r.name}<br>
+        <b>العمر:</b> ${r.age}<br>
+        <b>ID Discord:</b> ${r.discordId}<br>
+        <b>الخبرة:</b> ${r.exp}<br>
+        <b>السبب:</b> ${r.reason}<br>
+        <b>تاريخ التقديم:</b> ${formattedDate}<br>
+        <b>الحالة:</b> <span class="status ${statusClass}">${statusText}</span><br>
+        <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
+        <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
       `;
-
       container.appendChild(div);
     });
   });
 }
 
-/* تحديث الحالة */
-window.updateStatus = function(id,status){
-  update(ref(db,'طلبات/'+id),{status});
-  showToast("تم تحديث الحالة 🔔");
-}
-
-/* البحث */
-window.searchRequests = function(){
-  const val=document.getElementById('search').value.toLowerCase();
-  document.querySelectorAll('.card').forEach(c=>{
-    c.style.display=c.innerText.toLowerCase().includes(val)?'block':'none';
+// تحديث حالة الطلب عند تحديث الصفحة
+function updateStatusByDiscord(discordId) {
+  if(!discordId) return;
+  const statusSelect = document.getElementById('statusSelect');
+  const requestsRef = ref(db, 'طلبات');
+  onValue(requestsRef, snapshot => {
+    snapshot.forEach(child => {
+      const r = child.val();
+      if(r.discordId === discordId) {
+        if(r.status === 'accepted') statusSelect.value = "✅ مقبول";
+        else if(r.status === 'rejected') statusSelect.value = "❌ مرفوض";
+        else statusSelect.value = "⏳ قيد الانتظار";
+      }
+    });
   });
 }
 </script>
 </head>
-
 <body>
 
-<header>🚔 Trust Police Academy</header>
+<header>Trust | Police Academy</header>
 
 <nav>
-<button onclick="showPage('home')">الرئيسية</button>
-<button onclick="showPage('apply')">التقديم</button>
-<button onclick="showPage('admin'); loadRequests()">الإدارة</button>
+  <button onclick="showPage('home')">الرئيسية</button>
+  <button onclick="showPage('rules')">القوانين</button>
+  <button onclick="showPage('apply')">التقديم</button>
+  <button onclick="showPage('admin')">الإدارة</button>
 </nav>
 
 <section id="home" class="active">
-<div class="container">
-<h2>مرحبا بك في الأكاديمية</h2>
-<p>نظام تقديم احترافي</p>
-</div>
+  <div class="container">
+    <h2>مرحبا بك في الأكاديمية</h2>
+    <p>نظام تقديم احترافي للانضمام إلى الشرطة</p>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="container">
+    <h2>قوانين التقديم</h2>
+    <ul>
+      <li>يجب أن تكون لديك خلفية عن نظام الشرطة وقوانينها</li>
+      <li>يجب أن يكون الاسم بالانجليزي وواقعي</li>
+      <li>يجب الحضور بلبس المحدد</li>
+      <li>يجب احضار الهوية</li>
+      <li>يمنع اي وشوم على الجسم أو الوجه</li>
+      <li>اسم ابو مثل abu ahmed ممنوع</li>
+      <li>يجب عليك الحضور في وقت التقديم المذكور بالأعلى</li>
+    </ul>
+  </div>
 </section>
 
 <section id="apply">
-<div class="container">
-<h2>📋 نموذج التقديم</h2>
+  <div class="container">
+    <h2>نموذج التقديم</h2>
 
-<input id="name" placeholder="الاسم">
-<input id="age" placeholder="العمر">
-<input id="discordId" placeholder="Discord ID">
-<textarea id="exp" placeholder="الخبرة"></textarea>
-<textarea id="reason" placeholder="سبب التقديم"></textarea>
+    <label for="statusSelect">حالة التقديم:</label>
+    <select id="statusSelect" disabled>
+      <option>⏳ قيد الانتظار</option>
+      <option>✅ مقبول</option>
+      <option>❌ مرفوض</option>
+    </select>
 
-<button class="submit" onclick="submitForm()">إرسال</button>
-<div id="formMessage"></div>
-</div>
+    <input id="name" placeholder="الاسم الكامل">
+    <input id="age" type="number" placeholder="العمر">
+    <input id="discordId" placeholder="ID Discord">
+    <textarea id="exp" placeholder="الخبرات"></textarea>
+    <textarea id="reason" placeholder="سبب التقديم"></textarea>
+    <button class="submit" onclick="submitForm()">إرسال</button>
+    <div id="formMessage" class="message-box"></div>
+  </div>
 </section>
 
 <section id="admin">
-<div class="container">
-<h2>🛡️ لوحة الإدارة</h2>
-
-<input id="search" placeholder="🔍 بحث بالاسم..." onkeyup="searchRequests()">
-
-<div id="requests"></div>
-</div>
+  <div class="container">
+    <h2>لوحة الإدارة</h2>
+    <input type="password" id="adminPass" placeholder="أدخل كلمة مرور الإدارة">
+    <button onclick="checkAdminPassword()">تسجيل الدخول</button>
+    <div id="adminMessage" class="message-box"></div>
+    <div id="requests"></div>
+  </div>
 </section>
-
-<div id="toast" class="toast"></div>
-
-<script>
-function showPage(id){
-  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-</script>
 
 </body>
 </html>
