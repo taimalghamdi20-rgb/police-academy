@@ -7,194 +7,172 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
-body {
-  font-family: 'Cairo', sans-serif;
-  background: radial-gradient(circle at top,#020617,#000000);
-  color: white;
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:#020617;color:white}
 
-/* Header LSPD */
-header {
-  padding: 25px;
-  text-align: center;
-  font-size: 32px;
-  font-weight: bold;
-  background: linear-gradient(90deg,#0f172a,#1e293b);
-  border-bottom: 2px solid #1d4ed8;
-  letter-spacing:2px;
-}
+header{padding:25px;text-align:center;font-size:30px;font-weight:bold;background:#020617;border-bottom:2px solid #1e40af}
 
-/* Navbar */
-nav { display:flex; justify-content:center; gap:15px; padding:15px; }
-nav button {
-  padding:10px 18px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#020617;
-  color:#cbd5f5;
-  border:1px solid #1e40af;
-  transition:0.3s;
-}
-nav button:hover {
-  background:#1e40af;
-  color:white;
-  box-shadow:0 0 10px #1e40af;
-}
+nav{display:flex;justify-content:center;gap:15px;padding:15px}
+nav button{padding:10px 15px;border:none;border-radius:6px;background:#020617;color:#cbd5f5;border:1px solid #1e40af;cursor:pointer;transition:.3s}
+nav button:hover{background:#1e40af;color:#fff;box-shadow:0 0 10px #1e40af}
 
-section { display:none; padding:30px; }
-.active { display:block; animation:fadeIn .4s ease; }
+section{display:none;padding:30px}
+.active{display:block;animation:fade .4s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
 
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(10px);} 
-  to {opacity:1; transform:translateY(0);} 
-}
+.container{max-width:800px;margin:auto;background:#020617;padding:25px;border-radius:10px;border:1px solid #1e40af}
 
-.container {
-  max-width:800px;
-  margin:auto;
-  background:rgba(2,6,23,0.9);
-  padding:30px;
-  border-radius:10px;
-  border:1px solid #1e40af;
-  box-shadow:0 0 25px rgba(30,64,175,0.3);
-}
+input,textarea,select{width:100%;margin-top:10px;padding:12px;border-radius:6px;border:1px solid #1e40af;background:#020617;color:white}
+input:focus,textarea:focus{outline:none;box-shadow:0 0 10px #3b82f6}
 
-/* Inputs LSPD */
-input, textarea {
-  width:100%;
-  margin-top:12px;
-  padding:14px;
-  border-radius:6px;
-  border:1px solid #1e40af;
-  background:#020617;
-  color:white;
-  transition:0.2s;
-}
+button.submit{margin-top:15px;padding:12px;width:100%;background:#1e40af;border:none;border-radius:6px;cursor:pointer}
+button.submit:hover{background:#2563eb}
 
-input:focus, textarea:focus {
-  outline:none;
-  border-color:#3b82f6;
-  box-shadow:0 0 10px #3b82f6;
-}
+.card{background:#020617;border-left:4px solid #1e40af;padding:15px;margin-top:10px;border-radius:6px}
 
-/* زر */
-button.submit {
-  margin-top:20px;
-  padding:14px;
-  width:100%;
-  background:#1e40af;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
-}
-button.submit:hover {
-  background:#2563eb;
-  box-shadow:0 0 15px #2563eb;
-}
-
-/* Cards */
-.card {
-  margin-top:15px;
-  padding:15px;
-  border-radius:8px;
-  border-left:5px solid #1e40af;
-  background:#020617;
-}
-
-/* Alerts */
-.alert {
-  position:fixed;
-  top:20px;
-  right:20px;
-  padding:12px 18px;
-  border-radius:6px;
-  font-weight:bold;
-  animation:slide .4s ease;
-}
-.success { background:#16a34a; }
-.error { background:#dc2626; }
-
-@keyframes slide {
-  from {transform:translateX(100%);} 
-  to {transform:translateX(0);} 
-}
-
+.alert{position:fixed;top:20px;right:20px;padding:10px 15px;border-radius:6px;font-weight:bold;animation:slide .4s}
+.success{background:#16a34a}
+.error{background:#dc2626}
+@keyframes slide{from{transform:translateX(100%)}to{transform:translateX(0)}}
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
-  authDomain: "trust-police-academy.firebaseapp.com",
-  databaseURL: "https://trust-police-academy-default-rtdb.firebaseio.com",
-  projectId: "trust-police-academy",
+ apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
+ authDomain:"trust-police-academy.firebaseapp.com",
+ databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",
+ projectId:"trust-police-academy"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
-window.showPage = function(page) {
-  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(page).classList.add('active');
+let isAdmin=false;
+let currentKey=null;
+
+window.showPage=function(page){
+ document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+ document.getElementById(page).classList.add('active');
+ if(page==='admin'&&isAdmin)loadRequests();
 }
 
-function alertBox(msg,type) {
-  const div=document.createElement('div');
-  div.className='alert '+type;
-  div.innerText=msg;
-  document.body.appendChild(div);
-  setTimeout(()=>div.remove(),3000);
+function alertBox(msg,type){
+ const div=document.createElement('div');
+ div.className='alert '+type;
+ div.innerText=msg;
+ document.body.appendChild(div);
+ setTimeout(()=>div.remove(),3000);
 }
 
-window.submitForm = function() {
-  const name=document.getElementById('name').value.trim();
-  const age=document.getElementById('age').value.trim();
-  const discordId=document.getElementById('discordId').value.trim();
-  const exp=document.getElementById('exp').value.trim();
-  const reason=document.getElementById('reason').value.trim();
+window.checkAdminPassword=function(){
+ const pass=document.getElementById('adminPass').value;
+ if(pass==='Police2026!'){
+  isAdmin=true;
+  alertBox('تم تسجيل الدخول','success');
+  loadRequests();
+ }else alertBox('كلمة المرور غلط','error');
+}
 
-  if(!name||!age||!discordId||!exp||!reason){
-    alertBox('اكمل جميع الحقول','error');
-    return;
-  }
+window.submitForm=function(){
+ const name=document.getElementById('name').value.trim();
+ const age=document.getElementById('age').value.trim();
+ const discordId=document.getElementById('discordId').value.trim();
+ const exp=document.getElementById('exp').value.trim();
+ const reason=document.getElementById('reason').value.trim();
 
-  push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending'});
-  alertBox('تم ارسال الطلب','success');
+ if(!name||!age||!discordId||!exp||!reason){
+  alertBox('اكمل كل الحقول','error');
+  return;
+ }
+
+ push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()})
+ .then(snap=>{
+  currentKey=snap.key;
+  alertBox('تم الإرسال','success');
+  watchStatus();
+ });
+}
+
+function watchStatus(){
+ if(!currentKey)return;
+ onValue(ref(db,'طلبات/'+currentKey),snap=>{
+  const r=snap.val();
+  const select=document.getElementById('status');
+  if(r.status==='accepted')select.value='✅ مقبول';
+  else if(r.status==='rejected')select.value='❌ مرفوض';
+  else select.value='⏳ انتظار';
+ });
+}
+
+window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
+window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
+
+function loadRequests(){
+ const box=document.getElementById('requests');
+ box.innerHTML='';
+ onValue(ref(db,'طلبات'),snap=>{
+  box.innerHTML='';
+  snap.forEach(child=>{
+   const r=child.val();
+   const key=child.key;
+   const div=document.createElement('div');
+   div.className='card';
+   div.innerHTML=`
+   <b>${r.name}</b><br>
+   العمر: ${r.age}<br>
+   ID: ${r.discordId}<br>
+   <button onclick="acceptRequest('${key}')">قبول</button>
+   <button onclick="rejectRequest('${key}')">رفض</button>`;
+   box.appendChild(div);
+  });
+ });
 }
 </script>
 </head>
 <body>
 
-<header>LSPD | POLICE ACADEMY</header>
+<header>LSPD | ACADEMY</header>
 
 <nav>
-  <button onclick="showPage('home')">الرئيسية</button>
-  <button onclick="showPage('apply')">التقديم</button>
+<button onclick="showPage('home')">الرئيسية</button>
+<button onclick="showPage('apply')">التقديم</button>
+<button onclick="showPage('admin')">الإدارة</button>
 </nav>
 
 <section id="home" class="active">
-  <div class="container">
-    <h2>Los Santos Police Department</h2>
-    <p>نظام التقديم الرسمي للأكاديمية</p>
-  </div>
+<div class="container">
+<h2>Los Santos Police Department</h2>
+<p>نظام التقديم الرسمي</p>
+</div>
 </section>
 
 <section id="apply">
-  <div class="container">
-    <h2>طلب الانضمام</h2>
-    <input id="name" placeholder="الاسم الكامل">
-    <input id="age" type="number" placeholder="العمر">
-    <input id="discordId" placeholder="Discord ID">
-    <textarea id="exp" placeholder="الخبرات"></textarea>
-    <textarea id="reason" placeholder="سبب التقديم"></textarea>
-    <button class="submit" onclick="submitForm()">إرسال الطلب</button>
-  </div>
+<div class="container">
+<h2>التقديم</h2>
+<select id="status" disabled>
+<option>⏳ انتظار</option>
+<option>✅ مقبول</option>
+<option>❌ مرفوض</option>
+</select>
+<input id="name" placeholder="الاسم">
+<input id="age" type="number" placeholder="العمر">
+<input id="discordId" placeholder="Discord ID">
+<textarea id="exp" placeholder="الخبرة"></textarea>
+<textarea id="reason" placeholder="السبب"></textarea>
+<button class="submit" onclick="submitForm()">إرسال</button>
+</div>
+</section>
+
+<section id="admin">
+<div class="container">
+<h2>لوحة الإدارة</h2>
+<input type="password" id="adminPass" placeholder="كلمة المرور">
+<button onclick="checkAdminPassword()">دخول</button>
+<div id="requests"></div>
+</div>
 </section>
 
 </body>
