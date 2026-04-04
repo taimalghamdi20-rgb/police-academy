@@ -128,40 +128,62 @@ window.deleteRequest=id=>{
  }
 };
 
+let allRequests = [];
+
 function loadRequests(){
  const box=document.getElementById('requests');
+ const searchValue=(document.getElementById('search')?.value||'').toLowerCase();
  box.innerHTML='';
+
  onValue(ref(db,'طلبات'),snap=>{
   box.innerHTML='';
+  allRequests=[];
+
   snap.forEach(child=>{
    const r=child.val();
    const key=child.key;
-
-   // FIX: لا نستخدم Date.now() هنا عشان ما تتغير الأوقات
-   const date=new Date(r.time);
-   const formatted=date.toLocaleString('ar-SA');
-
-   let statusClass='pending';
-   let statusText='⏳ انتظار';
-   if(r.status==='accepted'){statusClass='accepted';statusText='✅ مقبول';}
-   if(r.status==='rejected'){statusClass='rejected';statusText='❌ مرفوض';}
-
-   const div=document.createElement('div');
-   div.className='card '+statusClass;
-   div.innerHTML=`
-   <b>الاسم:</b> ${r.name}<br>
-   <b>العمر:</b> ${r.age}<br>
-   <b>ID:</b> ${r.discordId}<br>
-   <b>الخبرات:</b> ${r.exp}<br>
-   <b>السبب:</b> ${r.reason}<br>
-   <b>التاريخ:</b> ${formatted}<br>
-   <b class="status ${statusClass==='accepted'?'acceptedText':statusClass==='rejected'?'rejectedText':'pending'}">${statusText}</b><br>
-   <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
-   <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
-   <button class="delete" onclick="deleteRequest('${key}')">حذف</button>`;
-
-   box.appendChild(div);
+   allRequests.push({r,key});
   });
+
+  renderRequests(searchValue);
+ });
+}
+
+window.searchRequests=function(){
+ const value=document.getElementById('search').value.toLowerCase();
+ renderRequests(value);
+}
+
+function renderRequests(filter){
+ const box=document.getElementById('requests');
+ box.innerHTML='';
+
+ allRequests.forEach(({r,key})=>{
+  if(filter && !r.name.toLowerCase().includes(filter)) return;
+
+  const date=new Date(r.time);
+  const formatted=date.toLocaleString('ar-SA');
+
+  let statusClass='pending';
+  let statusText='⏳ انتظار';
+  if(r.status==='accepted'){statusClass='accepted';statusText='✅ مقبول';}
+  if(r.status==='rejected'){statusClass='rejected';statusText='❌ مرفوض';}
+
+  const div=document.createElement('div');
+  div.className='card '+statusClass;
+  div.innerHTML=`
+  <b>الاسم:</b> ${r.name}<br>
+  <b>العمر:</b> ${r.age}<br>
+  <b>ID:</b> ${r.discordId}<br>
+  <b>الخبرات:</b> ${r.exp}<br>
+  <b>السبب:</b> ${r.reason}<br>
+  <b>التاريخ:</b> ${formatted}<br>
+  <b class="status ${statusClass==='accepted'?'acceptedText':statusClass==='rejected'?'rejectedText':'pending'}">${statusText}</b><br>
+  <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
+  <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
+  <button class="delete" onclick="deleteRequest('${key}')">حذف</button>`;
+
+  box.appendChild(div);
  });
 }
 </script>
@@ -205,6 +227,7 @@ function loadRequests(){
 <h2>لوحة الإدارة</h2>
 <input type="password" id="adminPass" placeholder="كلمة المرور">
 <button onclick="checkAdminPassword()">دخول</button>
+<input id="search" placeholder="ابحث باسم المتقدم" oninput="searchRequests()">
 <div id="requests"></div>
 </div>
 </section>
