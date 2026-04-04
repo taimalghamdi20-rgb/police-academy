@@ -20,14 +20,10 @@ section{display:none;padding:30px}
 .active{display:block;animation:fade .4s}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
-.container{max-width:900px;margin:auto;background:#020617;padding:25px;border-radius:10px;border:1px solid #1e40af}
+.container{max-width:850px;margin:auto;background:#020617;padding:25px;border-radius:10px;border:1px solid #1e40af}
 
 input,textarea,select{width:100%;margin-top:10px;padding:12px;border-radius:6px;border:1px solid #1e40af;background:#020617;color:white}
-input:focus,textarea:focus,select:focus{outline:none;box-shadow:0 0 10px #3b82f6}
-
-.search-box{display:flex;gap:10px;margin-top:10px}
-.search-box input{flex:2}
-.search-box select{flex:1}
+input:focus,textarea:focus{outline:none;box-shadow:0 0 10px #3b82f6}
 
 button.submit{margin-top:15px;padding:12px;width:100%;background:#1e40af;border:none;border-radius:6px;cursor:pointer}
 button.submit:hover{background:#2563eb}
@@ -56,13 +52,18 @@ button.submit:hover{background:#2563eb}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-const firebaseConfig={apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",authDomain:"trust-police-academy.firebaseapp.com",databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",projectId:"trust-police-academy"};
+const firebaseConfig={
+ apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
+ authDomain:"trust-police-academy.firebaseapp.com",
+ databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",
+ projectId:"trust-police-academy"
+};
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 let isAdmin=false;
-let allRequests=[];
+let currentKey=null;
 
 window.showPage=function(page){
  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
@@ -80,52 +81,86 @@ function alertBox(msg,type){
 
 window.checkAdminPassword=function(){
  const pass=document.getElementById('adminPass').value;
- if(pass==='Police2026!'){isAdmin=true;alertBox('تم تسجيل الدخول','success');loadRequests();}
- else alertBox('كلمة المرور غلط','error');
+ if(pass==='Police2026!'){
+  isAdmin=true;
+  alertBox('تم تسجيل الدخول','success');
+  loadRequests();
+ }else alertBox('كلمة المرور غلط','error');
 }
 
 window.submitForm=function(){
- const name=nameEl.value.trim();
- const age=ageEl.value.trim();
- const discordId=discordEl.value.trim();
- const exp=expEl.value.trim();
- const reason=reasonEl.value.trim();
- if(!name||!age||!discordId||!exp||!reason){alertBox('اكمل كل الحقول','error');return;}
- push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()});
- alertBox('تم الإرسال','success');
+ const name=document.getElementById('name').value.trim();
+ const age=document.getElementById('age').value.trim();
+ const discordId=document.getElementById('discordId').value.trim();
+ const exp=document.getElementById('exp').value.trim();
+ const reason=document.getElementById('reason').value.trim();
+
+ if(!name||!age||!discordId||!exp||!reason){
+  alertBox('اكمل كل الحقول','error');
+  return;
+ }
+
+ push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()})
+ .then(snap=>{
+  currentKey=snap.key;
+  alertBox('تم الإرسال','success');
+  watchStatus();
+ });
+}
+
+function watchStatus(){
+ if(!currentKey)return;
+ onValue(ref(db,'طلبات/'+currentKey),snap=>{
+  const r=snap.val();
+  const select=document.getElementById('status');
+  if(r.status==='accepted')select.value='✅ مقبول';
+  else if(r.status==='rejected')select.value='❌ مرفوض';
+  else select.value='⏳ انتظار';
+ });
 }
 
 window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
 window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
-window.deleteRequest=id=>{if(confirm('حذف الطلب؟')) remove(ref(db,'طلبات/'+id));}
+window.deleteRequest=id=>{
+ if(confirm('هل أنت متأكد من حذف الطلب؟')){
+  remove(ref(db,'طلبات/'+id));
+  alertBox('تم حذف الطلب','success');
+ }
+};
+
+let allRequests = [];
 
 function loadRequests(){
+ const box=document.getElementById('requests');
+ const searchValue=(document.getElementById('search')?.value||'').toLowerCase();
+ box.innerHTML='';
+
  onValue(ref(db,'طلبات'),snap=>{
+  box.innerHTML='';
   allRequests=[];
-  snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
-  renderRequests();
+
+  snap.forEach(child=>{
+   const r=child.val();
+   const key=child.key;
+   allRequests.push({r,key});
+  });
+
+  renderRequests(searchValue);
  });
 }
 
-window.searchRequests=renderRequests;
+window.searchRequests=function(){
+ const value=document.getElementById('search').value.toLowerCase();
+ renderRequests(value);
+}
 
-function renderRequests(){
+function renderRequests(filter){
  const box=document.getElementById('requests');
- const search=document.getElementById('search').value.toLowerCase();
- const statusFilter=document.getElementById('filter').value;
- const sort=document.getElementById('sort').value;
-
- let data=[...allRequests];
-
- if(search) data=data.filter(x=>x.r.name.toLowerCase().includes(search));
- if(statusFilter!=='all') data=data.filter(x=>x.r.status===statusFilter);
-
- if(sort==='new') data.sort((a,b)=>b.r.time-a.r.time);
- if(sort==='old') data.sort((a,b)=>a.r.time-b.r.time);
-
  box.innerHTML='';
 
- data.forEach(({r,key})=>{
+ allRequests.forEach(({r,key})=>{
+  if(filter && !r.name.toLowerCase().includes(filter)) return;
+
   const date=new Date(r.time);
   const formatted=date.toLocaleString('ar-SA');
 
@@ -137,13 +172,13 @@ function renderRequests(){
   const div=document.createElement('div');
   div.className='card '+statusClass;
   div.innerHTML=`
-  <b>${r.name}</b><br>
-  العمر: ${r.age}<br>
-  ID: ${r.discordId}<br>
-  الخبرات: ${r.exp}<br>
-  السبب: ${r.reason}<br>
-  التاريخ: ${formatted}<br>
-  <b class="${statusClass==='accepted'?'acceptedText':statusClass==='rejected'?'rejectedText':'pending'}">${statusText}</b><br>
+  <b>الاسم:</b> ${r.name}<br>
+  <b>العمر:</b> ${r.age}<br>
+  <b>ID:</b> ${r.discordId}<br>
+  <b>الخبرات:</b> ${r.exp}<br>
+  <b>السبب:</b> ${r.reason}<br>
+  <b>التاريخ:</b> ${formatted}<br>
+  <b class="status ${statusClass==='accepted'?'acceptedText':statusClass==='rejected'?'rejectedText':'pending'}">${statusText}</b><br>
   <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
   <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
   <button class="delete" onclick="deleteRequest('${key}')">حذف</button>`;
@@ -163,39 +198,39 @@ function renderRequests(){
 <button onclick="showPage('admin')">الإدارة</button>
 </nav>
 
-<section id="home" class="active"><div class="container"><h2>LSPD</h2></div></section>
+<section id="home" class="active">
+<div class="container">
+<h2>Los Santos Police Department</h2>
+<p>نظام التقديم الرسمي</p>
+</div>
+</section>
 
-<section id="apply"><div class="container">
+<section id="apply">
+<div class="container">
 <h2>التقديم</h2>
-<input id="nameEl" placeholder="الاسم">
-<input id="ageEl" placeholder="العمر">
-<input id="discordEl" placeholder="Discord ID">
-<textarea id="expEl" placeholder="الخبرات"></textarea>
-<textarea id="reasonEl" placeholder="السبب"></textarea>
+<select id="status" disabled>
+<option>⏳ انتظار</option>
+<option>✅ مقبول</option>
+<option>❌ مرفوض</option>
+</select>
+<input id="name" placeholder="الاسم">
+<input id="age" type="number" placeholder="العمر">
+<input id="discordId" placeholder="Discord ID">
+<textarea id="exp" placeholder="الخبرات"></textarea>
+<textarea id="reason" placeholder="سبب التقديم"></textarea>
 <button class="submit" onclick="submitForm()">إرسال</button>
-</div></section>
+</div>
+</section>
 
-<section id="admin"><div class="container">
+<section id="admin">
+<div class="container">
 <h2>لوحة الإدارة</h2>
 <input type="password" id="adminPass" placeholder="كلمة المرور">
 <button onclick="checkAdminPassword()">دخول</button>
-
-<div class="search-box">
-<input id="search" placeholder="بحث بالاسم" oninput="searchRequests()">
-<select id="filter" onchange="searchRequests()">
-<option value="all">كل الحالات</option>
-<option value="pending">انتظار</option>
-<option value="accepted">مقبول</option>
-<option value="rejected">مرفوض</option>
-</select>
-<select id="sort" onchange="searchRequests()">
-<option value="new">الأحدث</option>
-<option value="old">الأقدم</option>
-</select>
-</div>
-
+<input id="search" placeholder="ابحث باسم المتقدم" oninput="searchRequests()">
 <div id="requests"></div>
-</div></section>
+</div>
+</section>
 
 </body>
 </html>
