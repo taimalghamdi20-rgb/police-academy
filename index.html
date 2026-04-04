@@ -12,15 +12,25 @@ body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
 
 /* 🔥 بنر مطابق للصورة */
 .top-banner{
-  background:linear-gradient(rgba(10,13,18,.85),rgba(10,13,18,.95)),url('https://images.unsplash.com/photo-1581090700227-1e8c1e3f2f1a');
+  background:url('https://files.fm/u/kwmh93txcb');
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
   height:200px;
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
   padding:30px 50px;
   border-bottom:1px solid #1f2937;
+  position:relative;
+}
+
+/* تحسين الجودة + وضوح */
+.top-banner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8));
 }
 
 .banner-text h1{
