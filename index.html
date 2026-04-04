@@ -3,186 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LSPD | Police Academy</title>
+<title>LSPD Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Cairo',sans-serif;background:#020617;color:white}
+body{
+  font-family:'Cairo',sans-serif;
+  background:linear-gradient(180deg,#f8fafc,#e2e8f0);
+  color:#0f172a;
+}
 
-header{padding:25px;text-align:center;font-size:30px;font-weight:bold;background:#020617;border-bottom:2px solid #1e40af}
+/* Header بتصميم مشابه للصورة */
+header{
+  background:white;
+  padding:30px;
+  text-align:center;
+  border-bottom:3px solid #3b82f6;
+  position:relative;
+}
 
-nav{display:flex;justify-content:center;gap:15px;padding:15px}
-nav button{padding:10px 15px;border:none;border-radius:6px;background:#020617;color:#cbd5f5;border:1px solid #1e40af;cursor:pointer;transition:.3s}
-nav button:hover{background:#1e40af;color:#fff;box-shadow:0 0 10px #1e40af}
+header h1{
+  font-size:32px;
+  color:#2563eb;
+  letter-spacing:2px;
+}
+
+header span{
+  display:block;
+  font-size:14px;
+  color:#64748b;
+  margin-top:5px;
+}
+
+/* خلفية شكل مائي */
+header::after{
+  content:"";
+  position:absolute;
+  bottom:-20px;
+  left:0;
+  width:100%;
+  height:60px;
+  background:radial-gradient(circle at center,#93c5fd,transparent);
+  opacity:.4;
+}
+
+nav{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding:15px;
+}
+
+nav button{
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:white;
+  border:1px solid #cbd5f5;
+  cursor:pointer;
+  transition:.3s;
+}
+
+nav button:hover{
+  background:#3b82f6;
+  color:white;
+}
 
 section{display:none;padding:30px}
 .active{display:block;animation:fade .4s}
-@keyframes fade{from{opacity:0}to{opacity:1}}
 
-.container{max-width:850px;margin:auto;background:#020617;padding:25px;border-radius:10px;border:1px solid #1e40af}
+@keyframes fade{
+  from{opacity:0}
+  to{opacity:1}
+}
 
-input,textarea,select{width:100%;margin-top:10px;padding:12px;border-radius:6px;border:1px solid #1e40af;background:#020617;color:white}
-input:focus,textarea:focus{outline:none;box-shadow:0 0 10px #3b82f6}
+.container{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
 
-button.submit{margin-top:15px;padding:12px;width:100%;background:#1e40af;border:none;border-radius:6px;cursor:pointer}
-button.submit:hover{background:#2563eb}
+input,textarea,select{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #cbd5f5;
+}
 
-.card{padding:15px;margin-top:10px;border-radius:6px;background:#020617;border-left:5px solid #facc15}
-.card.accepted{border-left-color:#16a34a;background:rgba(22,163,74,0.15)}
-.card.rejected{border-left-color:#dc2626;background:rgba(220,38,38,0.15)}
+input:focus,textarea:focus{
+  outline:none;
+  border-color:#3b82f6;
+  box-shadow:0 0 10px rgba(59,130,246,.3);
+}
 
-.card button{margin-top:10px;margin-left:5px;padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
-.card .accept{background:#16a34a;color:white}
-.card .reject{background:#dc2626;color:white}
-.card .delete{background:#6b7280;color:white}
+button.submit{
+  margin-top:15px;
+  padding:12px;
+  width:100%;
+  background:#3b82f6;
+  border:none;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
 
-.status{font-weight:bold}
-.pending{color:#facc15}
-.acceptedText{color:#16a34a}
-.rejectedText{color:#dc2626}
+.card{
+  padding:15px;
+  margin-top:10px;
+  border-radius:8px;
+  background:#f1f5f9;
+  border-left:5px solid #facc15;
+}
 
-.alert{position:fixed;top:20px;right:20px;padding:10px 15px;border-radius:6px;font-weight:bold;animation:slide .4s}
-.success{background:#16a34a}
-.error{background:#dc2626}
-@keyframes slide{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.card.accepted{border-left-color:#22c55e;background:#dcfce7}
+.card.rejected{border-left-color:#ef4444;background:#fee2e2}
+
+.card button{
+  margin-top:10px;
+  margin-left:5px;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.accept{background:#22c55e;color:white}
+.reject{background:#ef4444;color:white}
+.delete{background:#64748b;color:white}
+
+.search-box{display:flex;gap:10px;margin-top:10px}
+
+.alert{
+  position:fixed;
+  top:20px;
+  right:20px;
+  padding:10px 15px;
+  border-radius:6px;
+  color:white;
+}
+.success{background:#22c55e}
+.error{background:#ef4444}
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-const firebaseConfig={
- apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
- authDomain:"trust-police-academy.firebaseapp.com",
- databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",
- projectId:"trust-police-academy"
-};
+const firebaseConfig={apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",authDomain:"trust-police-academy.firebaseapp.com",databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",projectId:"trust-police-academy"};
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 let isAdmin=false;
-let currentKey=null;
+let allRequests=[];
 
-window.showPage=function(page){
+window.showPage=(p)=>{
  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
- document.getElementById(page).classList.add('active');
- if(page==='admin'&&isAdmin)loadRequests();
+ document.getElementById(p).classList.add('active');
+ if(p==='admin'&&isAdmin)loadRequests();
 }
 
-function alertBox(msg,type){
- const div=document.createElement('div');
- div.className='alert '+type;
- div.innerText=msg;
- document.body.appendChild(div);
- setTimeout(()=>div.remove(),3000);
+function alertBox(m,t){
+ const d=document.createElement('div');
+ d.className='alert '+t;
+ d.innerText=m;
+ document.body.appendChild(d);
+ setTimeout(()=>d.remove(),3000);
 }
 
-window.checkAdminPassword=function(){
- const pass=document.getElementById('adminPass').value;
- if(pass==='Police2026!'){
-  isAdmin=true;
-  alertBox('تم تسجيل الدخول','success');
-  loadRequests();
- }else alertBox('كلمة المرور غلط','error');
+window.checkAdminPassword=()=>{
+ const p=document.getElementById('adminPass').value;
+ if(p==='Police2026!'){isAdmin=true;alertBox('تم الدخول','success');loadRequests();}
+ else alertBox('خطأ','error');
 }
 
-window.submitForm=function(){
- const name=document.getElementById('name').value.trim();
- const age=document.getElementById('age').value.trim();
- const discordId=document.getElementById('discordId').value.trim();
- const exp=document.getElementById('exp').value.trim();
- const reason=document.getElementById('reason').value.trim();
-
- if(!name||!age||!discordId||!exp||!reason){
-  alertBox('اكمل كل الحقول','error');
-  return;
- }
-
- push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()})
- .then(snap=>{
-  currentKey=snap.key;
-  alertBox('تم الإرسال','success');
-  watchStatus();
- });
-}
-
-function watchStatus(){
- if(!currentKey)return;
- onValue(ref(db,'طلبات/'+currentKey),snap=>{
-  const r=snap.val();
-  const select=document.getElementById('status');
-  if(r.status==='accepted')select.value='✅ مقبول';
-  else if(r.status==='rejected')select.value='❌ مرفوض';
-  else select.value='⏳ انتظار';
- });
+window.submitForm=()=>{
+ const name=nameEl.value.trim();
+ const age=ageEl.value.trim();
+ const discordId=discordEl.value.trim();
+ const exp=expEl.value.trim();
+ const reason=reasonEl.value.trim();
+ if(!name||!age||!discordId||!exp||!reason){alertBox('اكمل الحقول','error');return;}
+ push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()});
+ alertBox('تم','success');
 }
 
 window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
 window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
-window.deleteRequest=id=>{
- if(confirm('هل أنت متأكد من حذف الطلب؟')){
-  remove(ref(db,'طلبات/'+id));
-  alertBox('تم حذف الطلب','success');
- }
-};
-
-let allRequests = [];
+window.deleteRequest=id=>remove(ref(db,'طلبات/'+id));
 
 function loadRequests(){
- const box=document.getElementById('requests');
- const searchValue=(document.getElementById('search')?.value||'').toLowerCase();
- box.innerHTML='';
-
  onValue(ref(db,'طلبات'),snap=>{
-  box.innerHTML='';
   allRequests=[];
-
-  snap.forEach(child=>{
-   const r=child.val();
-   const key=child.key;
-   allRequests.push({r,key});
-  });
-
-  renderRequests(searchValue);
+  snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
+  renderRequests();
  });
 }
 
-window.searchRequests=function(){
- const value=document.getElementById('search').value.toLowerCase();
- renderRequests(value);
-}
+window.searchRequests=renderRequests;
 
-function renderRequests(filter){
+function renderRequests(){
  const box=document.getElementById('requests');
+ const search=document.getElementById('search').value.toLowerCase();
  box.innerHTML='';
-
  allRequests.forEach(({r,key})=>{
-  if(filter && !r.name.toLowerCase().includes(filter)) return;
-
-  const date=new Date(r.time);
-  const formatted=date.toLocaleString('ar-SA');
-
-  let statusClass='pending';
-  let statusText='⏳ انتظار';
-  if(r.status==='accepted'){statusClass='accepted';statusText='✅ مقبول';}
-  if(r.status==='rejected'){statusClass='rejected';statusText='❌ مرفوض';}
+  if(search && !r.name.toLowerCase().includes(search)) return;
+  const date=new Date(r.time).toLocaleString('ar-SA');
+  let cls='pending',txt='انتظار';
+  if(r.status==='accepted'){cls='accepted';txt='مقبول'}
+  if(r.status==='rejected'){cls='rejected';txt='مرفوض'}
 
   const div=document.createElement('div');
-  div.className='card '+statusClass;
-  div.innerHTML=`
-  <b>الاسم:</b> ${r.name}<br>
-  <b>العمر:</b> ${r.age}<br>
-  <b>ID:</b> ${r.discordId}<br>
-  <b>الخبرات:</b> ${r.exp}<br>
-  <b>السبب:</b> ${r.reason}<br>
-  <b>التاريخ:</b> ${formatted}<br>
-  <b class="status ${statusClass==='accepted'?'acceptedText':statusClass==='rejected'?'rejectedText':'pending'}">${statusText}</b><br>
-  <button class="accept" onclick="acceptRequest('${key}')">قبول</button>
-  <button class="reject" onclick="rejectRequest('${key}')">رفض</button>
-  <button class="delete" onclick="deleteRequest('${key}')">حذف</button>`;
-
+  div.className='card '+cls;
+  div.innerHTML=`${r.name}<br>${r.age}<br>${r.discordId}<br>${r.exp}<br>${r.reason}<br>${date}<br>${txt}<br>
+  <button class='accept' onclick="acceptRequest('${key}')">قبول</button>
+  <button class='reject' onclick="rejectRequest('${key}')">رفض</button>
+  <button class='delete' onclick="deleteRequest('${key}')">حذف</button>`;
   box.appendChild(div);
  });
 }
@@ -190,7 +231,10 @@ function renderRequests(filter){
 </head>
 <body>
 
-<header>LSPD | ACADEMY</header>
+<header>
+<h1>LSPD Academy</h1>
+<span>Police Application System</span>
+</header>
 
 <nav>
 <button onclick="showPage('home')">الرئيسية</button>
@@ -198,39 +242,25 @@ function renderRequests(filter){
 <button onclick="showPage('admin')">الإدارة</button>
 </nav>
 
-<section id="home" class="active">
-<div class="container">
-<h2>Los Santos Police Department</h2>
-<p>نظام التقديم الرسمي</p>
-</div>
-</section>
+<section id="home" class="active"><div class="container">مرحبا</div></section>
 
-<section id="apply">
-<div class="container">
-<h2>التقديم</h2>
-<select id="status" disabled>
-<option>⏳ انتظار</option>
-<option>✅ مقبول</option>
-<option>❌ مرفوض</option>
-</select>
-<input id="name" placeholder="الاسم">
-<input id="age" type="number" placeholder="العمر">
-<input id="discordId" placeholder="Discord ID">
-<textarea id="exp" placeholder="الخبرات"></textarea>
-<textarea id="reason" placeholder="سبب التقديم"></textarea>
+<section id="apply"><div class="container">
+<input id="nameEl" placeholder="الاسم">
+<input id="ageEl" placeholder="العمر">
+<input id="discordEl" placeholder="Discord ID">
+<textarea id="expEl" placeholder="الخبرات"></textarea>
+<textarea id="reasonEl" placeholder="السبب"></textarea>
 <button class="submit" onclick="submitForm()">إرسال</button>
-</div>
-</section>
+</div></section>
 
-<section id="admin">
-<div class="container">
-<h2>لوحة الإدارة</h2>
-<input type="password" id="adminPass" placeholder="كلمة المرور">
+<section id="admin"><div class="container">
+<input id="adminPass" placeholder="كلمة المرور">
 <button onclick="checkAdminPassword()">دخول</button>
-<input id="search" placeholder="ابحث باسم المتقدم" oninput="searchRequests()">
-<div id="requests"></div>
+<div class="search-box">
+<input id="search" placeholder="بحث" oninput="searchRequests()">
 </div>
-</section>
+<div id="requests"></div>
+</div></section>
 
 </body>
 </html>
