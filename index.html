@@ -10,7 +10,36 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
 
-/* 🔥 بنر مطابق للصورة */
+/* 🔥 الصورة الجديدة فوق */
+.main-image{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:10px;
+  animation:fadeIn 1.5s ease;
+}
+
+.main-image img{
+  width:90%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:10px;
+  transition:0.3s;
+}
+
+.main-image img:hover{
+  transform:scale(1.02);
+  box-shadow:0 0 30px rgba(255,255,255,0.4);
+}
+
+/* حركة دخول */
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(-30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* 🔥 بنر القديم */
 .top-banner{
   background:url('https://files.fm/u/kwmh93txcb');
   background-size:cover;
@@ -25,7 +54,6 @@ body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
   position:relative;
 }
 
-/* تحسين الجودة + وضوح */
 .top-banner::before{
   content:"";
   position:absolute;
@@ -44,7 +72,6 @@ body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
   color:#9ca3af;
 }
 
-/* لوقو يمين */
 .logo{
   width:60px;
   height:60px;
@@ -136,121 +163,24 @@ button.submit{
 .success{background:#22c55e}
 .error{background:#ef4444}
 </style>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-const firebaseConfig={apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",authDomain:"trust-police-academy.firebaseapp.com",databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",projectId:"trust-police-academy"};
-
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-
-let isAdmin=false;
-let allRequests=[];
-let currentKey=null;
-
-window.showPage=function(p){
- document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
- document.getElementById(p).classList.add('active');
- if(p==='admin'&&isAdmin)loadRequests();
-}
-
-function alertBox(m,t){
- const d=document.createElement('div');
- d.className='alert '+t;
- d.innerText=m;
- document.body.appendChild(d);
- setTimeout(()=>d.remove(),3000);
-}
-
-window.checkAdminPassword=function(){
- const p=document.getElementById('adminPass').value;
- if(p==='Police2026!'){isAdmin=true;alertBox('تم الدخول','success');loadRequests();}
- else alertBox('خطأ','error');
-}
-
-window.submitForm=function(){
- const name=nameEl.value.trim();
- const age=ageEl.value.trim();
- const discordId=discordEl.value.trim();
- const exp=expEl.value.trim();
- const reason=reasonEl.value.trim();
-
- if(!name||!age||!discordId||!exp||!reason){alertBox('اكمل الحقول','error');return;}
-
- push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()})
- .then(snap=>{currentKey=snap.key;watchStatus();alertBox('تم الإرسال','success');});
-}
-
-function watchStatus(){
- if(!currentKey)return;
- onValue(ref(db,'طلبات/'+currentKey),snap=>{
-  const r=snap.val();
-  const s=document.getElementById('status');
-  if(!s)return;
-  if(r.status==='accepted')s.value='✅ مقبول';
-  else if(r.status==='rejected')s.value='❌ مرفوض';
-  else s.value='⏳ انتظار';
- });
-}
-
-window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
-window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
-window.deleteRequest=id=>remove(ref(db,'طلبات/'+id));
-
-function loadRequests(){
- onValue(ref(db,'طلبات'),snap=>{
-  allRequests=[];
-  snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
-  renderRequests();
- });
-}
-
-window.searchRequests=renderRequests;
-
-function renderRequests(){
- const box=document.getElementById('requests');
- const search=document.getElementById('search').value.toLowerCase();
- box.innerHTML='';
-
- allRequests.forEach(({r,key})=>{
-  if(search && !r.name.toLowerCase().includes(search)) return;
-
-  const date=new Date(r.time).toLocaleString('ar-SA');
-  let cls='pending',txt='⏳ انتظار';
-  if(r.status==='accepted'){cls='accepted';txt='✅ مقبول'}
-  if(r.status==='rejected'){cls='rejected';txt='❌ مرفوض'}
-
-  const div=document.createElement('div');
-  div.className='card '+cls;
-  div.innerHTML=`
-  <b>الاسم:</b> ${r.name}<br>
-  <b>العمر:</b> ${r.age}<br>
-  <b>ID:</b> ${r.discordId}<br>
-  <b>الخبرات:</b> ${r.exp}<br>
-  <b>السبب:</b> ${r.reason}<br>
-  <b>التاريخ:</b> ${date}<br>
-  <b>${txt}</b><br>
-  <button class='accept' onclick="acceptRequest('${key}')">قبول</button>
-  <button class='reject' onclick="rejectRequest('${key}')">رفض</button>
-  <button class='delete' onclick="deleteRequest('${key}')">حذف</button>`;
-
-  box.appendChild(div);
- });
-}
-</script>
 </head>
+
 <body>
 
+<!-- 🔥 الصورة الجديدة -->
+<div class="main-image">
+  <img src="https://i.imgur.com/1d6sksS.png" alt="TS Banner">
+</div>
+
+<!-- 🔥 البانر القديم -->
 <div class="top-banner">
   <div class="banner-text">
     <h1>Trust State | Ministry of Interior - Academy</h1>
     <span>Official Police System</span>
   </div>
   <div class="logo">
-  <img src="a_digital_logo_logo_design_for_a_police_academy.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
-</div>
+    <img src="a_digital_logo_logo_design_for_a_police_academy.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
+  </div>
 </div>
 
 <nav>
@@ -286,4 +216,3 @@ function renderRequests(){
 
 </body>
 </html>
-
