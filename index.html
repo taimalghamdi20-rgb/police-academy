@@ -10,14 +10,12 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
 
-/* 🔥 الصورة الجديدة فوق */
+/* 🔥 (جديد) صورة فوق فقط */
 .main-image{
   width:100%;
   display:flex;
   justify-content:center;
-  align-items:center;
   margin-bottom:10px;
-  animation:fadeIn 1.5s ease;
 }
 
 .main-image img{
@@ -25,21 +23,9 @@ body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
   max-height:220px;
   object-fit:cover;
   border-radius:10px;
-  transition:0.3s;
 }
 
-.main-image img:hover{
-  transform:scale(1.02);
-  box-shadow:0 0 30px rgba(255,255,255,0.4);
-}
-
-/* حركة دخول */
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(-30px);}
-  to{opacity:1;transform:translateY(0);}
-}
-
-/* 🔥 بنر القديم */
+/* 🔥 بنر مطابق للصورة */
 .top-banner{
   background:url('https://files.fm/u/kwmh93txcb');
   background-size:cover;
@@ -54,6 +40,7 @@ body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
   position:relative;
 }
 
+/* تحسين الجودة + وضوح */
 .top-banner::before{
   content:"";
   position:absolute;
@@ -72,6 +59,7 @@ body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
   color:#9ca3af;
 }
 
+/* لوقو يمين */
 .logo{
   width:60px;
   height:60px;
@@ -164,23 +152,21 @@ button.submit{
 .error{background:#ef4444}
 </style>
 </head>
-
 <body>
 
-<!-- 🔥 الصورة الجديدة -->
+<!-- 🔥 (جديد) الصورة فقط -->
 <div class="main-image">
-  <img src="https://i.imgur.com/1d6sksS.png" alt="TS Banner">
+  <img src="https://i.imgur.com/1d6sksS.png">
 </div>
 
-<!-- 🔥 البانر القديم -->
 <div class="top-banner">
   <div class="banner-text">
     <h1>Trust State | Ministry of Interior - Academy</h1>
     <span>Official Police System</span>
   </div>
   <div class="logo">
-    <img src="a_digital_logo_logo_design_for_a_police_academy.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
-  </div>
+  <img src="a_digital_logo_logo_design_for_a_police_academy.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
+</div>
 </div>
 
 <nav>
