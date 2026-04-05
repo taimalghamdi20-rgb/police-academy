@@ -151,13 +151,112 @@ button.submit{
 .success{background:#22c55e}
 .error{background:#ef4444}
 </style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",authDomain:"trust-police-academy.firebaseapp.com",databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",projectId:"trust-police-academy"};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let isAdmin=false;
+let allRequests=[];
+let currentKey=null;
+
+window.showPage=function(p){
+ document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+ document.getElementById(p).classList.add('active');
+ if(p==='admin'&&isAdmin)loadRequests();
+}
+
+function alertBox(m,t){
+ const d=document.createElement('div');
+ d.className='alert '+t;
+ d.innerText=m;
+ document.body.appendChild(d);
+ setTimeout(()=>d.remove(),3000);
+}
+
+window.checkAdminPassword=function(){
+ const p=document.getElementById('adminPass').value;
+ if(p==='Police2026!'){isAdmin=true;alertBox('تم الدخول','success');loadRequests();}
+ else alertBox('خطأ','error');
+}
+
+window.submitForm=function(){
+ const name=nameEl.value.trim();
+ const age=ageEl.value.trim();
+ const discordId=discordEl.value.trim();
+ const exp=expEl.value.trim();
+ const reason=reasonEl.value.trim();
+
+ if(!name||!age||!discordId||!exp||!reason){alertBox('اكمل الحقول','error');return;}
+
+ push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()})
+ .then(snap=>{currentKey=snap.key;watchStatus();alertBox('تم الإرسال','success');});
+}
+
+function watchStatus(){
+ if(!currentKey)return;
+ onValue(ref(db,'طلبات/'+currentKey),snap=>{
+  const r=snap.val();
+  const s=document.getElementById('status');
+  if(!s)return;
+  if(r.status==='accepted')s.value='✅ مقبول';
+  else if(r.status==='rejected')s.value='❌ مرفوض';
+  else s.value='⏳ انتظار';
+ });
+}
+
+window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
+window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
+window.deleteRequest=id=>remove(ref(db,'طلبات/'+id));
+
+function loadRequests(){
+ onValue(ref(db,'طلبات'),snap=>{
+  allRequests=[];
+  snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
+  renderRequests();
+ });
+}
+
+window.searchRequests=renderRequests;
+
+function renderRequests(){
+ const box=document.getElementById('requests');
+ const search=document.getElementById('search').value.toLowerCase();
+ box.innerHTML='';
+
+ allRequests.forEach(({r,key})=>{
+  if(search && !r.name.toLowerCase().includes(search)) return;
+
+  const date=new Date(r.time).toLocaleString('ar-SA');
+  let cls='pending',txt='⏳ انتظار';
+  if(r.status==='accepted'){cls='accepted';txt='✅ مقبول'}
+  if(r.status==='rejected'){cls='rejected';txt='❌ مرفوض'}
+
+  const div=document.createElement('div');
+  div.className='card '+cls;
+  div.innerHTML=`
+  <b>الاسم:</b> ${r.name}<br>
+  <b>العمر:</b> ${r.age}<br>
+  <b>ID:</b> ${r.discordId}<br>
+  <b>الخبرات:</b> ${r.exp}<br>
+  <b>السبب:</b> ${r.reason}<br>
+  <b>التاريخ:</b> ${date}<br>
+  <b>${txt}</b><br>
+  <button class='accept' onclick="acceptRequest('${key}')">قبول</button>
+  <button class='reject' onclick="rejectRequest('${key}')">رفض</button>
+  <button class='delete' onclick="deleteRequest('${key}')">حذف</button>`;
+
+  box.appendChild(div);
+ });
+}
+</script>
 </head>
 <body>
-
-<!-- 🔥 (جديد) الصورة فقط -->
-<div class="main-image">
-  <img src="https://i.imgur.com/1d6sksS.png">
-</div>
 
 <div class="top-banner">
   <div class="banner-text">
