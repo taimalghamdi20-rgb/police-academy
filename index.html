@@ -7,17 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
 
-<body>
-
-<div class="https://i.imgur.com/hkqECfm.png"></div>
-
-<div class="https://i.imgur.com/hkqECfm.png">
-  ...
-</div>
-}
-
-/* 🔥 البنر الجديد */
+/* البنر */
 .main-banner{
   width:100%;
   height:260px;
@@ -42,30 +35,16 @@
   border-bottom:1px solid #1f2937;
 }
 
-.banner-text h1{
-  font-size:22px;
-  margin:0;
-}
-
-.banner-text span{
-  font-size:12px;
-  color:#9ca3af;
-}
+.banner-text h1{font-size:22px}
+.banner-text span{font-size:12px;color:#9ca3af}
 
 /* اللوقو */
 .logo{
-  width:60px;
-  height:60px;
-  border-radius:50%;
+  width:60px;height:60px;border-radius:50%;
   border:2px solid rgba(255,255,255,0.2);
   overflow:hidden;
 }
-
-.logo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+.logo img{width:100%;height:100%;object-fit:cover}
 
 /* الناف */
 nav{
@@ -85,7 +64,7 @@ nav button{
   cursor:pointer;
 }
 
-/* باقي كودك بدون تغيير */
+/* باقي التصميم */
 section{display:none;padding:30px}
 .active{display:block}
 
@@ -132,16 +111,13 @@ button.submit{
 .alert{position:fixed;top:20px;right:20px;padding:10px;border-radius:6px}
 .success{background:#22c55e}
 .error{background:#ef4444}
-
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 البنر -->
 <div class="main-banner"></div>
 
-<!-- الهيدر -->
 <div class="top-banner">
   <div class="banner-text">
     <h1>Trust State | Ministry of Interior - Academy</h1>
@@ -183,12 +159,136 @@ button.submit{
 <div class="container">
 <input id="adminPass" placeholder="كلمة المرور" type="password">
 <button onclick="checkAdminPassword()">دخول</button>
+
 <div class="search-box">
 <input id="search" placeholder="بحث بالاسم" oninput="searchRequests()">
 </div>
+
 <div id="requests"></div>
 </div>
 </section>
+
+<!-- 🔥 سكربت Firebase بعد التعديل -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, push, get, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",
+ authDomain:"trust-police-academy.firebaseapp.com",
+ databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",
+ projectId:"trust-police-academy"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let isAdmin=false;
+let allRequests=[];
+
+/* تنقل */
+window.showPage=function(p){
+ document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+ document.getElementById(p).classList.add('active');
+ if(p==='admin'&&isAdmin)loadRequests();
+}
+
+/* تنبيه */
+function alertBox(m,t){
+ const d=document.createElement('div');
+ d.className='alert '+t;
+ d.innerText=m;
+ document.body.appendChild(d);
+ setTimeout(()=>d.remove(),3000);
+}
+
+/* ادمن */
+window.checkAdminPassword=function(){
+ const p=document.getElementById('adminPass').value;
+ if(p==='Police2026!'){
+   isAdmin=true;
+   alertBox('تم الدخول','success');
+   loadRequests();
+ } else alertBox('خطأ','error');
+}
+
+/* 🔥 إرسال مع انتظار 3 دقائق */
+window.submitForm=function(){
+ const now=Date.now();
+ const last=localStorage.getItem('lastSubmit');
+
+ if(last && now - last < 180000){
+   const sec=Math.ceil((180000-(now-last))/1000);
+   alertBox('انتظر '+sec+' ثانية قبل التقديم مرة ثانية','error');
+   return;
+ }
+
+ const name=nameEl.value.trim();
+ const age=ageEl.value.trim();
+ const discordId=discordEl.value.trim();
+ const exp=expEl.value.trim();
+ const reason=reasonEl.value.trim();
+
+ if(!name||!age||!discordId||!exp||!reason){
+   alertBox('اكمل الحقول','error');
+   return;
+ }
+
+ push(ref(db,'طلبات'),{
+   name,age,discordId,exp,reason,
+   status:'pending',
+   time:Date.now()
+ }).then(()=>{
+   localStorage.setItem('lastSubmit',Date.now());
+   alertBox('تم الإرسال','success');
+ });
+}
+
+/* 🔥 تحميل مرة وحدة */
+function loadRequests(){
+ get(ref(db,'طلبات')).then(snap=>{
+   allRequests=[];
+   snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
+   renderRequests();
+ });
+}
+
+window.searchRequests=renderRequests;
+
+function renderRequests(){
+ const box=document.getElementById('requests');
+ const search=document.getElementById('search').value.toLowerCase();
+ box.innerHTML='';
+
+ allRequests.forEach(({r,key})=>{
+  if(search && !r.name.toLowerCase().includes(search)) return;
+
+  const date=new Date(r.time).toLocaleString('ar-SA');
+  let cls='pending',txt='⏳ انتظار';
+  if(r.status==='accepted'){cls='accepted';txt='✅ مقبول'}
+  if(r.status==='rejected'){cls='rejected';txt='❌ مرفوض'}
+
+  const div=document.createElement('div');
+  div.className='card '+cls;
+  div.innerHTML=`
+  <b>الاسم:</b> ${r.name}<br>
+  <b>العمر:</b> ${r.age}<br>
+  <b>ID:</b> ${r.discordId}<br>
+  <b>الخبرات:</b> ${r.exp}<br>
+  <b>السبب:</b> ${r.reason}<br>
+  <b>التاريخ:</b> ${date}<br>
+  <b>${txt}</b><br>
+  <button class='accept' onclick="acceptRequest('${key}')">قبول</button>
+  <button class='reject' onclick="rejectRequest('${key}')">رفض</button>
+  <button class='delete' onclick="deleteRequest('${key}')">حذف</button>`;
+  box.appendChild(div);
+ });
+}
+
+window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
+window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
+window.deleteRequest=id=>remove(ref(db,'طلبات/'+id));
+</script>
 
 </body>
 </html>
