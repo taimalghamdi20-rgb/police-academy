@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trust State | Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Cairo',sans-serif;background:#0a0d12;color:white}
@@ -168,7 +167,6 @@ button.submit{
 </div>
 </section>
 
-<!-- 🔥 سكربت Firebase بعد التعديل -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, push, get, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -190,7 +188,7 @@ let allRequests=[];
 window.showPage=function(p){
  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
  document.getElementById(p).classList.add('active');
- if(p==='admin'&&isAdmin)loadRequests();
+ if(p==='admin'&&isAdmin) loadRequests();
 }
 
 /* تنبيه */
@@ -212,7 +210,7 @@ window.checkAdminPassword=function(){
  } else alertBox('خطأ','error');
 }
 
-/* 🔥 إرسال مع انتظار 3 دقائق */
+/* إرسال مع انتظار 3 دقائق */
 window.submitForm=function(){
  const now=Date.now();
  const last=localStorage.getItem('lastSubmit');
@@ -235,20 +233,22 @@ window.submitForm=function(){
  }
 
  push(ref(db,'طلبات'),{
-   name,age,discordId,exp,reason,
+   name, age, discordId, exp, reason,
    status:'pending',
    time:Date.now()
  }).then(()=>{
    localStorage.setItem('lastSubmit',Date.now());
    alertBox('تم الإرسال','success');
+   // مسح الحقول بعد الإرسال
+   nameEl.value=''; ageEl.value=''; discordEl.value=''; expEl.value=''; reasonEl.value='';
  });
 }
 
-/* 🔥 تحميل مرة وحدة */
+/* تحميل الطلبات */
 function loadRequests(){
  get(ref(db,'طلبات')).then(snap=>{
    allRequests=[];
-   snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
+   snap.forEach(c => allRequests.push({r:c.val(), key:c.key}));
    renderRequests();
  });
 }
