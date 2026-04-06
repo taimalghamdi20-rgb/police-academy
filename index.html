@@ -7,72 +7,83 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-/* ... الأكواد الأخرى ... */
 
-<div class="main-image">
-  <img src="https://chatgpt.com/backend-api/estuary/content?id=file_000000005ee471f5b55d31c293712ac7&ts=493164&p=fs&cid=1&sig=b38574582738577900d312b2defd5ea796b290ec4698aed5b8feda792f8cd103&v=0">
-</div>
+body{
+  font-family:'Cairo',sans-serif;
+  background:#020617;
+  color:white;
+  margin:0;
 }
 
-/* تظليل خفيف لإبراز النص */
-.top-banner::before{
+/* 🔥 البنر الجديد */
+.main-banner{
+  width:100%;
+  height:260px;
+  background:url('PUT-IMAGE-HERE') center/cover no-repeat;
+  position:relative;
+}
+
+.main-banner::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+  background:linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
 }
 
-.banner-text{ position:relative; z-index:1; }
+/* الهيدر */
+.top-banner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 40px;
+  background:#0f141b;
+  border-bottom:1px solid #1f2937;
+}
+
 .banner-text h1{
-  font-size:26px;
-  font-weight:700;
-  color:#e5e7eb;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  font-size:22px;
+  margin:0;
 }
 
 .banner-text span{
-  font-size:13px;
+  font-size:12px;
   color:#9ca3af;
 }
 
-/* لوقو يمين */
+/* اللوقو */
 .logo{
-  position:relative;
-  z-index:1;
   width:60px;
   height:60px;
   border-radius:50%;
   border:2px solid rgba(255,255,255,0.2);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  backdrop-filter:blur(5px);
+  overflow:hidden;
 }
 
+.logo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* الناف */
 nav{
   display:flex;
   justify-content:center;
   gap:15px;
   padding:15px;
   background:#0f141b;
-  border-bottom:1px solid #1f2937;
 }
 
 nav button{
-  padding:10px 15px;
+  padding:10px;
   background:#111827;
   border:1px solid #1f2937;
   color:#d1d5db;
   border-radius:6px;
   cursor:pointer;
-  transition:.3s;
 }
 
-nav button:hover{
-  background:#1f2937;
-  color:white;
-}
-
+/* باقي كودك بدون تغيير */
 section{display:none;padding:30px}
 .active{display:block}
 
@@ -82,17 +93,15 @@ section{display:none;padding:30px}
   background:#0f141b;
   padding:25px;
   border-radius:10px;
-  border:1px solid #1f2937;
 }
 
 input,textarea,select{
   width:100%;
   margin-top:10px;
   padding:12px;
-  border-radius:6px;
-  border:1px solid #1f2937;
   background:#020617;
   color:white;
+  border:1px solid #1f2937;
 }
 
 button.submit{
@@ -101,8 +110,6 @@ button.submit{
   width:100%;
   background:#1e40af;
   border:none;
-  border-radius:6px;
-  cursor:pointer;
 }
 
 .card{
@@ -115,132 +122,33 @@ button.submit{
 .card.accepted{border-left-color:#22c55e}
 .card.rejected{border-left-color:#ef4444}
 
-.card button{margin-top:10px;margin-left:5px;padding:6px 12px;border:none;border-radius:5px;cursor:pointer}
+.card button{margin-top:10px;margin-left:5px}
 .accept{background:#22c55e}
 .reject{background:#ef4444}
 .delete{background:#6b7280}
 
-.search-box{display:flex;gap:10px;margin-top:10px}
-
 .alert{position:fixed;top:20px;right:20px;padding:10px;border-radius:6px}
 .success{background:#22c55e}
 .error{background:#ef4444}
+
 </style>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-const firebaseConfig={apiKey:"AIzaSyAto5x8fpwvUmfnumsUekXLpyo3KGBsMt4",authDomain:"trust-police-academy.firebaseapp.com",databaseURL:"https://trust-police-academy-default-rtdb.firebaseio.com",projectId:"trust-police-academy"};
-
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-
-let isAdmin=false;
-let allRequests=[];
-let currentKey=null;
-
-window.showPage=function(p){
- document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
- document.getElementById(p).classList.add('active');
- if(p==='admin'&&isAdmin)loadRequests();
-}
-
-function alertBox(m,t){
- const d=document.createElement('div');
- d.className='alert '+t;
- d.innerText=m;
- document.body.appendChild(d);
- setTimeout(()=>d.remove(),3000);
-}
-
-window.checkAdminPassword=function(){
- const p=document.getElementById('adminPass').value;
- if(p==='Police2026!'){isAdmin=true;alertBox('تم الدخول','success');loadRequests();}
- else alertBox('خطأ','error');
-}
-
-window.submitForm=function(){
- const name=nameEl.value.trim();
- const age=ageEl.value.trim();
- const discordId=discordEl.value.trim();
- const exp=expEl.value.trim();
- const reason=reasonEl.value.trim();
-
- if(!name||!age||!discordId||!exp||!reason){alertBox('اكمل الحقول','error');return;}
-
- push(ref(db,'طلبات'),{name,age,discordId,exp,reason,status:'pending',time:Date.now()})
- .then(snap=>{currentKey=snap.key;watchStatus();alertBox('تم الإرسال','success');});
-}
-
-function watchStatus(){
- if(!currentKey)return;
- onValue(ref(db,'طلبات/'+currentKey),snap=>{
-  const r=snap.val();
-  const s=document.getElementById('status');
-  if(!s)return;
-  if(r.status==='accepted')s.value='✅ مقبول';
-  else if(r.status==='rejected')s.value='❌ مرفوض';
-  else s.value='⏳ انتظار';
- });
-}
-
-window.acceptRequest=id=>update(ref(db,'طلبات/'+id),{status:'accepted'});
-window.rejectRequest=id=>update(ref(db,'طلبات/'+id),{status:'rejected'});
-window.deleteRequest=id=>remove(ref(db,'طلبات/'+id));
-
-function loadRequests(){
- onValue(ref(db,'طلبات'),snap=>{
-  allRequests=[];
-  snap.forEach(c=>allRequests.push({r:c.val(),key:c.key}));
-  renderRequests();
- });
-}
-
-window.searchRequests=renderRequests;
-
-function renderRequests(){
- const box=document.getElementById('requests');
- const search=document.getElementById('search').value.toLowerCase();
- box.innerHTML='';
-
- allRequests.forEach(({r,key})=>{
-  if(search && !r.name.toLowerCase().includes(search)) return;
-
-  const date=new Date(r.time).toLocaleString('ar-SA');
-  let cls='pending',txt='⏳ انتظار';
-  if(r.status==='accepted'){cls='accepted';txt='✅ مقبول'}
-  if(r.status==='rejected'){cls='rejected';txt='❌ مرفوض'}
-
-  const div=document.createElement('div');
-  div.className='card '+cls;
-  div.innerHTML=`
-  <b>الاسم:</b> ${r.name}<br>
-  <b>العمر:</b> ${r.age}<br>
-  <b>ID:</b> ${r.discordId}<br>
-  <b>الخبرات:</b> ${r.exp}<br>
-  <b>السبب:</b> ${r.reason}<br>
-  <b>التاريخ:</b> ${date}<br>
-  <b>${txt}</b><br>
-  <button class='accept' onclick="acceptRequest('${key}')">قبول</button>
-  <button class='reject' onclick="rejectRequest('${key}')">رفض</button>
-  <button class='delete' onclick="deleteRequest('${key}')">حذف</button>`;
-
-  box.appendChild(div);
- });
-}
-</script>
 </head>
+
 <body>
 
+<!-- 🔥 البنر -->
+<div class="main-banner"></div>
+
+<!-- الهيدر -->
 <div class="top-banner">
   <div class="banner-text">
     <h1>Trust State | Ministry of Interior - Academy</h1>
     <span>Official Police System</span>
   </div>
+
   <div class="logo">
-  <img src="a_digital_logo_logo_design_for_a_police_academy.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
-</div>
+    <img src="PUT-LOGO-HERE">
+  </div>
 </div>
 
 <nav>
@@ -249,9 +157,12 @@ function renderRequests(){
 <button onclick="showPage('admin')">الإدارة</button>
 </nav>
 
-<section id="home" class="active"><div class="container">مرحبا بك في أكاديمية شرطة Trust State</div></section>
+<section id="home" class="active">
+<div class="container">مرحبا بك في أكاديمية شرطة Trust State</div>
+</section>
 
-<section id="apply"><div class="container">
+<section id="apply">
+<div class="container">
 <select id="status" disabled>
 <option>⏳ انتظار</option>
 <option>✅ مقبول</option>
@@ -263,16 +174,19 @@ function renderRequests(){
 <textarea id="expEl" placeholder="الخبرات"></textarea>
 <textarea id="reasonEl" placeholder="السبب"></textarea>
 <button class="submit" onclick="submitForm()">إرسال</button>
-</div></section>
+</div>
+</section>
 
-<section id="admin"><div class="container">
+<section id="admin">
+<div class="container">
 <input id="adminPass" placeholder="كلمة المرور" type="password">
 <button onclick="checkAdminPassword()">دخول</button>
 <div class="search-box">
 <input id="search" placeholder="بحث بالاسم" oninput="searchRequests()">
 </div>
 <div id="requests"></div>
-</div></section>
+</div>
+</section>
 
 </body>
 </html>
