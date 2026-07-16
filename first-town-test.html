@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار التفعيل - First Town</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#131313;
+    --line:#2a2a2a;
+    --red:#d8402f;
+    --text:#f1efe9;
+    --muted:#8f8c85;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Tajawal', sans-serif;
+    margin:0;
+    line-height:1.8;
+  }
+
+  .page{ max-width:820px; margin:0 auto; padding:0 22px 80px; }
+
+  /* ---------- HEADER ---------- */
+  header{
+    padding:50px 0 0;
+    border-bottom:5px solid var(--red);
+    margin-bottom:6px;
+  }
+  .brand-row{
+    display:flex; align-items:center; gap:16px; margin-bottom:18px;
+  }
+  .brand-row img{
+    width:52px; height:52px; border-radius:50%;
+    flex-shrink:0;
+    transition: transform .3s ease;
+  }
+  .brand-row img:hover{
+    transform: scale(1.12) rotate(-4deg);
+  }
+  header .tag{
+    display:inline-block;
+    font-weight:800;
+    font-size:22px;
+    background: linear-gradient(90deg, #ff8a3d, #d8402f 55%, #1a1a1a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding:0;
+  }
+  header h1{
+    font-family:'Almarai', sans-serif;
+    font-weight:800;
+    font-size:clamp(2rem, 6vw, 3.2rem);
+    margin:0 0 18px;
+    letter-spacing:-0.5px;
+    background: linear-gradient(135deg, #ffb35c 0%, #d8402f 40%, #2a1408 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+  }
+  header .info{
+    display:flex; gap:26px; flex-wrap:wrap;
+    padding-bottom:20px;
+    font-size:13px; color:var(--muted);
+  }
+  header .info b{ color:var(--text); font-size:15px; display:block; }
+
+  /* ---------- SECTION ---------- */
+  .sec-head{
+    display:flex; align-items:center; gap:14px;
+    margin:60px 0 4px;
+  }
+  .sec-head .no{
+    font-family:'Almarai', sans-serif;
+    font-weight:800; font-size:34px; color:var(--red);
+    line-height:1;
+  }
+  .sec-head h2{
+    font-family:'Almarai', sans-serif;
+    font-size:20px; color:#fff; margin:0;
+  }
+  .sec-sub{ color:var(--muted); font-size:13.5px; margin:0 0 26px; }
+
+  /* ---------- SCENARIO BLOCK ---------- */
+  .scenario{
+    position:relative;
+    border-inline-end:4px solid var(--line);
+    padding:0 26px 0 0;
+    margin-bottom:2px;
+  }
+  .scenario + .scenario{ border-top:1px solid var(--line); }
+
+  .scenario summary{
+    list-style:none; cursor:pointer;
+    display:flex; align-items:center; gap:18px;
+    padding:20px 0;
+  }
+  .scenario summary::-webkit-details-marker{ display:none; }
+
+  .scn-num{
+    font-family:'Almarai', sans-serif; font-weight:800;
+    font-size:15px; color:var(--bg);
+    background:var(--red);
+    width:34px; height:34px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .scn-title{ font-weight:700; font-size:16px; color:#fdfdfb; flex:1; }
+  .toggle{
+    font-family:'Almarai', sans-serif; font-size:20px; color:var(--muted);
+    flex-shrink:0; width:20px; text-align:center;
+  }
+  .scenario[open] .toggle{ color:var(--red); }
+
+  .scn-body{ padding:0 0 28px; }
+  .scn-body .text{
+    color:#cfccc4; font-size:14.5px; padding-inline-start:52px; margin-bottom:16px;
+  }
+  .verdict{
+    margin-inline-start:52px;
+    background:var(--panel);
+    border-inline-start:3px solid var(--red);
+    padding:14px 18px;
+  }
+  .verdict .v-title{
+    font-size:11px; font-weight:800; color:var(--red); letter-spacing:0.5px; margin-bottom:8px;
+  }
+  .verdict ul{ margin:0; padding-inline-start:18px; }
+  .verdict li{ font-size:13.8px; color:#d9d6cf; margin-bottom:7px; }
+  .verdict li:last-child{ margin-bottom:0; }
+
+  /* ---------- Q&A ---------- */
+  .qa{
+    border-top:1px solid var(--line);
+    padding:22px 0;
+    display:grid;
+    grid-template-columns:44px 1fr;
+    gap:16px;
+  }
+  .qa:last-child{ border-bottom:1px solid var(--line); }
+  .qa .qnum{
+    font-family:'Almarai', sans-serif; font-weight:800; font-size:22px; color:var(--red); line-height:1;
+  }
+  .qa .question{ font-weight:700; color:#fdfdfb; font-size:15px; margin-bottom:7px; }
+  .qa .answer{ color:var(--muted); font-size:14px; }
+
+  footer{
+    margin-top:60px; padding-top:20px;
+    border-top:5px solid var(--red);
+    font-size:12.5px; color:var(--muted);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
+  }
+
+  /* ---------- NAME GATE ---------- */
+  #gate{
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    z-index:999; padding:20px;
+  }
+  #gate .box{
+    width:100%; max-width:360px;
+    text-align:center;
+  }
+  #gate .box img{
+    width:56px; height:56px; border-radius:50%; margin-bottom:18px;
+  }
+  #gate h2{
+    font-family:'Almarai', sans-serif; font-weight:800; font-size:22px;
+    color:#fff; margin:0 0 8px;
+  }
+  #gate p{ color:var(--muted); font-size:13.5px; margin:0 0 22px; }
+  .discord-btn{
+    width:100%; background:#5865F2; color:#fff; border:none;
+    font-family:'Almarai', sans-serif; font-weight:800; font-size:15px;
+    padding:13px 14px; cursor:pointer; border-radius:4px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition: background .15s ease;
+  }
+  .discord-btn:hover{ background:#4752c4; }
+  .discord-btn:disabled{ opacity:.6; cursor:default; }
+  #gate .err{ color:var(--red); font-size:12.5px; margin-top:14px; display:none; }
+
+  #content{ display:none; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <img src="data:image/png;base64,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" alt="First Town logo">
+    <h2>سجل الدخول عشان تشوف الأسئلة</h2>
+    <p>الدخول متاح للإداريين المصرح لهم فقط عن طريق حساب Discord</p>
+    <button id="discordBtn" class="discord-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.245.198.372.292a.077.077 0 0 1-.006.127c-.598.35-1.22.645-1.873.892a.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.029 19.83 19.83 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+      تسجيل الدخول بـ Discord
+    </button>
+    <div class="err" id="gateErr">هذا الحساب غير مصرح له بالدخول</div>
+  </div>
+</div>
+
+<div id="content">
+
+  <header>
+    <div class="brand-row">
+      <img src="data:image/png;base64,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" alt="First Town logo">
+      <span class="tag">First Town Questions</span>
+    </div>
+    <h1>أسئلة التفعيل</h1>
+    <div class="info">
+      <div><b>5</b>سيناريوهات</div>
+      <div><b>6</b>أسئلة مفاهيم</div>
+    </div>
+  </header>
+
+  <div class="sec-head">
+    <span class="no">01</span>
+    <h2>السيناريوهات</h2>
+  </div>
+  <p class="sec-sub">اطرح السيناريو على المتقدم واطلب منه يحدد الأخطاء، ثم افتح الإجابة النموذجية للمقارنة.</p>
+
+  <details class="scenario">
+    <summary>
+      <span class="scn-num">١</span>
+      <span class="scn-title">صدم سيارة بناءً على افتراض</span>
+      <span class="toggle">＋</span>
+    </summary>
+    <div class="scn-body">
+      <div class="text">بلغت الشرطة عن شخص يهدد المارة بسلاح أبيض. وأثناء توجهك للموقع شاهدت سيارة سوداء تخرج بسرعة من الشارع، فافترضت أنها تخص المشتبه به. صدمت السيارة بدوريتك حتى توقفت، ثم نزلت ووجهت السلاح على السائق. وبعد التفتيش اكتشفت أنه شخص لا علاقة له بالبلاغ، فاعتذرت له وغادرت.</div>
+      <div class="verdict">
+        <div class="v-title">الإجابة</div>
+        <ul>
+          <li>اتخاذ إجراء بناءً على مجرد افتراض بدون أدلة أو RP كافٍ.</li>
+          <li>استخدام القوة قبل التأكد من هوية المشتبه.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary>
+      <span class="scn-num">٢</span>
+      <span class="scn-title">معلومة من بث ديسكورد</span>
+      <span class="toggle">＋</span>
+    </summary>
+    <div class="scn-body">
+      <div class="text">كنت تتمشى داخل المدينة، وفتحت بث أحد اللاعبين في الديسكورد. سمعت منه أنه متجه لمزرعة معينة لعقد صفقة غير قانونية. دخلت شخصيتك اللعبة وتوجهت مباشرة إلى المزرعة، واختبأت هناك حتى وصل، ثم قبضت عليه متلبسًا.</div>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary>
+      <span class="scn-num">٣</span>
+      <span class="scn-title">هروب بالقفز بين الأسطح بعد حادث</span>
+      <span class="toggle">＋</span>
+    </summary>
+    <div class="scn-body">
+      <div class="text">بعد مطاردة طويلة بسرعة عالية، اصطدمت سيارتك بعمود إنارة وانقلبت عدة مرات. خرجت من السيارة، ركضت مسافة طويلة، ثم تسلقت سورًا مرتفعًا وقفزت من سطح مبنى إلى آخر حتى تمكنت من الهروب.</div>
+      <div class="verdict">
+        <div class="v-title">الإجابة</div>
+        <ul>
+          <li>Power Gaming بالقيام بحركات غير واقعية بعد حادث قوي وإصابات مفترضة.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary>
+      <span class="scn-num">٤</span>
+      <span class="scn-title">قتل انتقامي داخل الكوفي</span>
+      <span class="toggle">＋</span>
+    </summary>
+    <div class="scn-body">
+      <div class="text">كنت جالسًا في كوفي داخل المدينة. دخل لاعب وجلس على الطاولة المقابلة بدون أن يتحدث أو يقوم بأي تصرف عدائي. تذكرت أنه الشخص الذي قتلك قبل يومين في سيناريو سابق، فأخرجت سلاحك وأطلقت النار عليه مباشرة.</div>
+      <div class="verdict">
+        <div class="v-title">الإجابة</div>
+        <ul>
+          <li>RDM لأنه لا يوجد مبرر داخل السيناريو الحالي.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary>
+      <span class="scn-num">٥</span>
+      <span class="scn-title">تفتيش وفرض اعتراف من طرف واحد</span>
+      <span class="toggle">＋</span>
+    </summary>
+    <div class="scn-body">
+      <div class="text">أنت شرطي، وأثناء تفتيش أحد الأشخاص رفض أن يعطيك هويته. كتبت في /me أنك أمسكت يده وثبتها وفتشت جيوبه وأخذت هاتفه، ثم كتبت أنه اعترف بكل شيء، ولم تمنحه أي فرصة للرد أو التفاعل مع ما يحدث.</div>
+      <div class="verdict">
+        <div class="v-title">الإجابة</div>
+        <ul>
+          <li>Power Gaming بفرض أفعال ونتائج على الطرف الآخر.</li>
+          <li>حرمان اللاعب الآخر من فرصة التفاعل مع السيناريو.</li>
+          <li>فرض اعتراف وإجراءات RP من طرف واحد.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <div class="sec-head">
+    <span class="no">02</span>
+    <h2>أسئلة مفاهيم</h2>
+  </div>
+  <p class="sec-sub">اطرح السؤال على المتقدم وقارن إجابته بالإجابة الموضحة تحته.</p>
+
+  <div class="qa">
+    <span class="qnum">٦</span>
+    <div>
+      <div class="question">وش المقصود بـ Power Gaming؟</div>
+      <div class="answer">هو القيام بأفعال غير واقعية أو فرض أفعال على الآخرين أو استغلال أشياء لا يمكن تنفيذها بشكل منطقي داخل الرول بلاي.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <span class="qnum">٧</span>
+    <div>
+      <div class="question">وش هو VDM؟</div>
+      <div class="answer">استخدام السيارة كسلاح لصدم أو قتل أو إيقاف لاعب آخر بدون مبرر RP يسمح بذلك. تُعامل بنفس خطورة القتل العشوائي (RDM).</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <span class="qnum">٨</span>
+    <div>
+      <div class="question">وش تعريف الرول بلاي؟</div>
+      <div class="answer">تمثيل شخصية خيالية والتفاعل معها بشكل واقعي داخل بيئة اللعبة، بحيث تتصرف كما يتصرف الشخص فعلًا في نفس الموقف، لا كلاعب يعرف أنه بلعبة.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <span class="qnum">٩</span>
+    <div>
+      <div class="question">هل يحق لك استخدام معلومات عرفتها خارج اللعبة؟</div>
+      <div class="answer">لا، وهذا يسمى Meta Gaming لأنه استخدام معلومات خارج الشخصية داخل الرول بلاي.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <span class="qnum">١٠</span>
+    <div>
+      <div class="question">إذا طلعك السيرفر (Crash) أثناء سيناريو، وش تسوي؟</div>
+      <div class="answer">ترجع بأسرع وقت وتكمل السيناريو إذا كان مستمرًا، أو تبلغ الإدارة إذا تعذر الرجوع.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <span class="qnum">١١</span>
+    <div>
+      <div class="question">صار لك حادث قوي بالسيارة، وش المطلوب منك؟</div>
+      <div class="answer">تمثيل أثر الحادث على الشخصية أو المركبة (إصابة أو صعوبة قيادة)، وعدم تجاهل الواقعية أو مواصلة الهروب وكأن شيئًا لم يحدث.</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>First Town — دليل المشرف لاختبار التفعيل</span>
+  </footer>
+
+</div>
+</div>
+
+<script>
+  // ===== Discord OAuth settings — update these after you deploy the site =====
+  const CLIENT_ID = "1527437570118782996";           // from https://discord.com/developers/applications
+  const REDIRECT_URI = window.location.origin + window.location.pathname; // auto-detected from your hosting URL
+  // =========================================================================
+
+  // ===== Bot backend settings — update after you deploy the bot (see bot/README.md) =====
+  const API_BASE_URL = "https://your-bot-server.example.com"; // no trailing slash
+  // =========================================================================
+
+  const gate = document.getElementById('gate');
+  const content = document.getElementById('content');
+  const discordBtn = document.getElementById('discordBtn');
+  const gateErr = document.getElementById('gateErr');
+
+  let pollTimer = null;
+
+  function getDeviceInfo(){
+    const ua = navigator.userAgent;
+    let device = "Desktop";
+    if(/Android/i.test(ua)) device = "Android";
+    else if(/iPhone|iPad|iPod/i.test(ua)) device = "iPhone/iPad";
+
+    let browser = "Unknown";
+    if(/Edg/i.test(ua)) browser = "Edge";
+    else if(/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = "Chrome";
+    else if(/Firefox/i.test(ua)) browser = "Firefox";
+    else if(/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+
+    return `${device} — ${browser}`;
+  }
+
+  async function getCountry(){
+    try{
+      const geo = await fetch('https://ipwho.is/').then(r => r.json());
+      if(geo && geo.success && geo.country) return geo.country;
+    }catch(e){}
+    return "Unknown";
+  }
+
+  function showError(message){
+    gateErr.textContent = message;
+    gateErr.style.display = 'block';
+  }
+
+  function startLogin(){
+    const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+    window.location.href = url;
+  }
+
+  function grantAccess(){
+    gate.style.display = 'none';
+    content.style.display = 'block';
+  }
+
+  function pollStatus(requestId){
+    pollTimer = setInterval(async () => {
+      try{
+        const res = await fetch(`${API_BASE_URL}/api/status/${requestId}`);
+        if(!res.ok) return;
+        const data = await res.json();
+
+        if(data.status === 'approved'){
+          clearInterval(pollTimer);
+          grantAccess();
+        } else if(data.status === 'rejected'){
+          clearInterval(pollTimer);
+          discordBtn.disabled = true;
+          discordBtn.textContent = "Access denied";
+          showError("An admin rejected your access request.");
+        }
+        // if still "pending", keep polling
+      }catch(e){
+        // ignore transient network errors and keep polling
+      }
+    }, 3000);
+  }
+
+  // Handle the redirect back from Discord (the token arrives in the URL fragment as #access_token=...)
+  (function handleRedirect(){
+    const hash = window.location.hash;
+    if(!hash || !hash.includes('access_token')) return;
+
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get('access_token');
+    if(!token) return;
+
+    // Clean the URL so the token doesn't stay visible
+    history.replaceState(null, '', window.location.pathname);
+
+    discordBtn.textContent = "Verifying...";
+    discordBtn.disabled = true;
+
+    fetch('https://discord.com/api/users/@me', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(async user => {
+      const tag = user.discriminator && user.discriminator !== "0"
+        ? `${user.username}#${user.discriminator}`
+        : user.username;
+
+      discordBtn.textContent = "Waiting for admin approval...";
+      const country = await getCountry();
+
+      const res = await fetch(`${API_BASE_URL}/api/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          discordId: user.id,
+          tag,
+          country,
+          device: getDeviceInfo()
+        })
+      });
+      const data = await res.json();
+
+      if(!data.requestId){
+        throw new Error('no requestId');
+      }
+
+      pollStatus(data.requestId);
+    })
+    .catch(() => {
+      showError("Something went wrong, please try again.");
+      discordBtn.disabled = false;
+      discordBtn.textContent = "Login with Discord";
+    });
+  })();
+
+  discordBtn.addEventListener('click', startLogin);
+</script>
+</body>
+</html>
